@@ -216,7 +216,8 @@ button.primary{background:var(--acc);border-color:var(--acc);box-shadow:none}
 .total .formula,.total .brk .k,.total .brk .c{opacity:1;color:var(--tx3)}
 .big{font-size:50px;color:var(--acc)!important}.brk{grid-template-columns:repeat(5,minmax(0,1fr));min-width:0;gap:8px}
 .total .brk>div{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px}
-.grid2{display:block}.grid2>.card{width:100%}
+.grid2{display:block!important;width:100%!important}
+.grid2>.card,.score-card{display:block!important;width:100%!important;max-width:none!important;float:none!important;clear:both}
 .course-tools,.grade-import{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:12px}
 input,select,textarea{max-width:100%;min-height:38px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
 input[type=number]{width:100%;text-align:right}
@@ -330,7 +331,7 @@ input[type=number]{width:100%;text-align:right}
 </div>
 
 <!-- 专业素质 -->
-<div class="card">
+<div class="card score-card">
   <h2>一、专业素质 <span class="w">60%</span></h2>
   <p class="desc">总平均学分值 = Σ（课程分数 × 课程学分）÷ Σ课程学分。公共选修课<strong>不计入</strong>；等次换算：优 90 / 良 80 / 中 70 / 合格 60 / 不合格 0。结果保留 2 位小数。</p>
   <div class="course-tools">
@@ -378,7 +379,7 @@ input[type=number]{width:100%;text-align:right}
 
 <div class="grid2">
   <!-- 思想道德 -->
-  <div class="card">
+  <div class="card score-card">
     <h2>二、思想道德素质 <span class="w">15%</span></h2>
     <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。</p>
     <div class="row" style="margin-bottom:6px">
@@ -406,7 +407,7 @@ input[type=number]{width:100%;text-align:right}
 </div>
 
 <!-- 实践创新 -->
-<div class="card">
+<div class="card score-card">
   <h2>三、实践创新素质 <span class="w">15%</span></h2>
   <p class="desc">基础分 40 ＋ 奖励分（上限 60）。满分 100。证书类每学年累计 ≤ 20（每项 ≤ 10）；作品类累计 ≤ 20；专业讲座 ≤ 5；学子大讲堂主讲 ≤ 6；招聘会 ≤ 10；未获奖参赛材料 ≤ 3；专利只计最高一项。</p>
   <div class="row" style="margin-bottom:6px">
@@ -425,7 +426,7 @@ input[type=number]{width:100%;text-align:right}
 </div>
 
 <!-- 身体心理 -->
-<div class="card">
+<div class="card score-card">
   <h2>四、身体心理素质 <span class="w">10%</span></h2>
   <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。集体项目 / 团队竞赛按标准<strong>减半</strong>（用系数 0.5）。</p>
   <div class="row" style="margin-bottom:6px">
