@@ -235,7 +235,7 @@ input[type=number]{width:100%;text-align:right}
 .photo-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.76)}
 .photo-modal.open{display:flex}.photo-modal img{display:block;max-width:min(1100px,94vw);max-height:88vh;border-radius:12px;background:#fff}
 .photo-modal button{position:fixed;right:20px;top:20px;background:#fff;color:#111;border:0}
-.bottom-save{position:relative;display:flex;justify-content:center;padding:8px 0 4px}
+.bottom-save{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px 0 4px}
 .bottom-save button{width:min(460px,100%);min-height:48px;font-size:16px;background:var(--acc);border-color:var(--acc);color:#fff}
 .bottom-save button:hover{background:var(--acc);color:#fff;filter:brightness(.96)}
 .sec{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:13px}
@@ -293,6 +293,7 @@ input[type=number]{width:100%;text-align:right}
     <select id="rJump" onchange="if(this.value)loadStudent(this.value)" title="快速跳转"></select>
     <div class="row" style="margin-left:auto">
       <button onclick="toggleImport()">导入名单</button>
+      <button onclick="toggleAllGradeImport()">批量导入全班成绩</button>
       <button onclick="exportExcel()">导出全班 Excel</button>
     </div>
   </div>
@@ -306,6 +307,16 @@ input[type=number]{width:100%;text-align:right}
       <label class="ck"><input type="checkbox" id="appendMode">追加到现有名单</label>
       <button class="sm" onclick="clearRoster()">清空名单</button>
       <span class="hint" id="importHint"></span>
+    </div>
+  </div>
+  <div class="importbox grade-import" id="allGradeImportBox" style="display:none">
+    <b>一键导入所有人成绩</b>
+    <p class="desc">建议直接从 Excel 复制六列：<code>学号　姓名　课程号　课程名称　学分　成绩</code>。每行一门课程，成绩支持数字或“优、良、中、合格、不合格”；系统按学号自动分配到名册中的学生。</p>
+    <textarea id="allGradeText" rows="9" placeholder="2023010101　张三　252012　综合英语Ⅰ　4　88&#10;2023010101　张三　252456　英语视听说Ⅰ　2　优&#10;2023010102　李四　252012　综合英语Ⅰ　4　91"></textarea>
+    <div class="row" style="margin-top:9px">
+      <button class="primary" onclick="importAllGrades()">一键导入所有人</button>
+      <label class="ck"><input type="checkbox" id="allGradeReplace">导入前清空所有人的现有课程</label>
+      <span class="hint" id="allGradeHint" role="status"></span>
     </div>
   </div>
 </div>
@@ -474,6 +485,7 @@ input[type=number]{width:100%;text-align:right}
 
 <div class="bottom-save">
   <button type="button" class="primary" onclick="saveCurrent()">保存当前学生数据</button>
+  <span class="hint" id="saveHint" role="status"></span>
 </div>
 
 </div>
@@ -803,6 +815,60 @@ function importGrades(){
   syncCourses(); recalc();
   $('gradeHint').textContent=`已导入 ${parsed.out.length} 门（新增 ${added}，更新 ${updated}）`+
     (parsed.bad.length?`；第 ${parsed.bad.join('、')} 行未识别`:'');
+}
+function toggleAllGradeImport(){
+  const box=$('allGradeImportBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+  if(box.style.display==='block') $('allGradeText').focus();
+}
+function parseAllGradeLines(text){
+  const out=[],bad=[];
+  text.split(/\r?\n/).forEach((line,lineNo)=>{
+    const t=line.trim();
+    if(!t||/^(序号|学号|姓名|班级)/.test(t)) return;
+    const parts=t.split(/[，,\t]+|\s+/).map(x=>x.trim()).filter(Boolean);
+    const sidIndex=parts.findIndex(x=>/^\d{4,}$/.test(x));
+    if(sidIndex<0){bad.push(lineNo+1);return;}
+    const sid=parts[sidIndex],name=parts[sidIndex+1]||'';
+    let scoreIndex=-1,score=null;
+    for(let i=parts.length-1;i>sidIndex;i--){const v=gradeValue(parts[i]);if(v!==null){scoreIndex=i;score=v;break;}}
+    if(scoreIndex<0){bad.push(lineNo+1);return;}
+    let creditIndex=-1,credit=null;
+    for(let i=scoreIndex-1;i>sidIndex;i--){const n=Number(parts[i]);if(Number.isFinite(n)&&n>0&&n<=20){creditIndex=i;credit=n;break;}}
+    if(creditIndex<0){bad.push(lineNo+1);return;}
+    let codeIndex=-1;
+    for(let i=sidIndex+2;i<creditIndex;i++){if(/^\d{6,7}$/.test(parts[i])){codeIndex=i;break;}}
+    const code=codeIndex>=0?parts[codeIndex]:'';
+    const courseName=parts.filter((_,i)=>i>sidIndex+1&&i<creditIndex&&i!==codeIndex).join(' ').trim();
+    if(!courseName&&!code){bad.push(lineNo+1);return;}
+    out.push({sid,name,code,nameCourse:courseName,credit,score,line:lineNo+1});
+  });
+  return {out,bad};
+}
+function importAllGrades(){
+  if(!roster.length){$('allGradeHint').textContent='请先导入学生名单';return;}
+  if(curId) store[curId]=state;
+  const parsed=parseAllGradeLines($('allGradeText').value);
+  if(!parsed.out.length){$('allGradeHint').textContent='未识别到有效成绩，请检查六列格式';return;}
+  if($('allGradeReplace').checked) roster.forEach(s=>{const d=store[s.id]||blankData();d.courses=[];store[s.id]=d;});
+  let imported=0,students=new Set(),unmatched=[];
+  parsed.out.forEach(c=>{
+    const student=roster.find(s=>String(s.sid||'')===c.sid)||roster.find(s=>c.name&&s.name===c.name);
+    if(!student){unmatched.push(`${c.sid}${c.name?' '+c.name:''}`);return;}
+    const d=store[student.id]||blankData();
+    d.courses=(d.courses||[]).filter(x=>x&&(x.name||x.code||Number.isFinite(x.credit)||Number.isFinite(x.score)));
+    const courses=d.courses;
+    const target=courses.find(x=>(c.code&&x.code===c.code)||normalizeCourseName(x.name)===normalizeCourseName(c.nameCourse));
+    const value={code:c.code,name:c.nameCourse||target?.name||c.code,credit:c.credit,score:c.score};
+    target?Object.assign(target,value):courses.push(value);
+    store[student.id]=d;students.add(student.id);imported++;
+  });
+  persist();
+  if(curId) loadStudent(curId);
+  const missing=[...new Set(unmatched)];
+  $('allGradeHint').textContent=`已为 ${students.size} 人导入 ${imported} 条成绩`+
+    (parsed.bad.length?`；第 ${parsed.bad.join('、')} 行未识别`:'')+
+    (missing.length?`；名册未匹配：${missing.slice(0,5).join('、')}${missing.length>5?'等':''}`:'');
 }
 
 /* ============ 加分条目 ============ */
@@ -1239,7 +1305,8 @@ function saveCurrent(){
   recalc();
   persist();
   const student=roster.find(x=>x.id===curId);
-  alert((student?.name||'当前学生')+'的数据已保存到本机浏览器。');
+  $('saveHint').textContent=(student?.name||'当前学生')+'的数据已保存到本机浏览器';
+  setTimeout(()=>{$('saveHint').textContent='';},4000);
 }
 function restore(){
   const raw = localStorage.getItem(KEY); if(!raw) return false;
