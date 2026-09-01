@@ -235,6 +235,9 @@ input[type=number]{width:100%;text-align:right}
 .photo-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.76)}
 .photo-modal.open{display:flex}.photo-modal img{display:block;max-width:min(1100px,94vw);max-height:88vh;border-radius:12px;background:#fff}
 .photo-modal button{position:fixed;right:20px;top:20px;background:#fff;color:#111;border:0}
+.bottom-save{position:relative;display:flex;justify-content:center;padding:8px 0 4px}
+.bottom-save button{width:min(460px,100%);min-height:48px;font-size:16px;background:var(--acc);border-color:var(--acc);color:#fff}
+.bottom-save button:hover{background:var(--acc);color:#fff;filter:brightness(.96)}
 .sec{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:13px}
 .tally{background:var(--panel2);border:0;border-radius:11px;padding:12px 14px;margin-top:14px}
 .rbar{gap:9px}.rinfo{flex:1}.rbar>select{min-width:180px}.prog{background:var(--panel2)}
@@ -467,6 +470,10 @@ input[type=number]{width:100%;text-align:right}
     <summary>查看分值速查表（竞赛 / 文体）</summary>
     <div id="refTables" style="margin-top:8px;font-size:12px;overflow-x:auto"></div>
   </details>
+</div>
+
+<div class="bottom-save">
+  <button type="button" class="primary" onclick="saveCurrent()">保存当前学生数据</button>
 </div>
 
 </div>
@@ -1228,6 +1235,12 @@ function persist(){
     if(!storageWarned){ storageWarned=true; alert('本地存储空间不足。请先导出数据备份，再移除部分材料照片。'); }
   }
 }
+function saveCurrent(){
+  recalc();
+  persist();
+  const student=roster.find(x=>x.id===curId);
+  alert((student?.name||'当前学生')+'的数据已保存到本机浏览器。');
+}
 function restore(){
   const raw = localStorage.getItem(KEY); if(!raw) return false;
   try{
@@ -1325,14 +1338,16 @@ function exportExcel(){
   const rankOf=key=>{ const a=[...scored].sort((x,y)=>y.score[key]-x.score[key]),m={};let r=0,last=null;a.forEach((x,i)=>{if(last===null||x.score[key]!==last)r=i+1;last=x.score[key];m[x.student.id]=r;});return m; };
   const rMajor=rankOf('major'),rConduct=rankOf('conduct'),rTotal=rankOf('total');
   scored.sort((a,b)=>b.score.total-a.score.total);
-  const summary=[['综合排名','专业排名','操行排名','学号','姓名','专业素质原始分','专业素质60%折算分','思想道德','实践创新','身体心理','操行素质','综合总分','评优资格','资格说明','课程门数','总学分','思想奖励','思想惩罚','实践奖励','身心奖励','身心惩罚']];
+  const summary=[['综合排名','专业排名','操行排名','学号','姓名','专业素质原始分','专业素质60%折算分','思想道德','实践创新','身体心理','操行素质','综合总分','已提交材料计入净分','已提交材料数','评优资格','资格说明','课程门数','总学分','思想奖励','思想惩罚','实践奖励','身心奖励','身心惩罚']];
   scored.forEach(x=>{ const z=x.score;
-    summary.push([rTotal[x.student.id],rMajor[x.student.id],rConduct[x.student.id],x.student.sid,x.student.name,z.major,r2(z.major*0.6),z.thought,z.innov,z.phys,z.conduct,z.total,z.disqualified?'取消':'正常',z.dqReason,z.nCourse,z.sumC,z.t.add,z.t.sub,z.i.add,z.p.add,z.p.sub]); });
+    const materialCount=['thought','innovation','physical'].reduce((n,m)=>n+(x.data.entries?.[m]?.add?.length||0)+(x.data.entries?.[m]?.sub?.length||0),0);
+    const materialNet=r2(z.t.add-z.t.sub+z.i.add+z.p.add-z.p.sub);
+    summary.push([rTotal[x.student.id],rMajor[x.student.id],rConduct[x.student.id],x.student.sid,x.student.name,z.major,r2(z.major*0.6),z.thought,z.innov,z.phys,z.conduct,z.total,materialNet,materialCount,z.disqualified?'取消':'正常',z.dqReason,z.nCourse,z.sumC,z.t.add,z.t.sub,z.i.add,z.p.add,z.p.sub]); });
   const courses=[['学号','姓名','课程号','课程名称','学分','成绩','自动等次','加权分']];
   people.forEach(({student:s,data:d})=>(d.courses||[]).forEach(c=>{
     if(Number.isFinite(c.credit)&&c.credit>0&&Number.isFinite(c.score)) courses.push([s.sid,s.name,c.code||'',c.name,c.credit,c.score,{'90':'优','80':'良','70':'中','60':'合格','0':'不合格'}[scoreGradeValue(c.score)]||'',r2(c.credit*c.score)]);
   }));
-  const entries=[['学号','姓名','模块','类型','项目','项目/证书名称及材料编号','材料状态','材料照片','标准分','次数','系数','计入分']];
+  const entries=[['学号','姓名','模块','类型','已提交材料项目','项目/证书名称及材料编号','材料状态','材料照片','材料原始分','次数','系数','提交材料最终计入分']];
   people.forEach(({student:s,data:d})=>{
     const z=computeScores(d), mods=[['thought','思想道德',z.t],['innovation','实践创新',z.i],['physical','身体心理',z.p]];
     mods.forEach(([mod,label,calc])=>{
@@ -1341,7 +1356,7 @@ function exportExcel(){
     });
   });
   const notes=[['项目','内容'],['文件','江西师范大学外国语学院本科生综合素质考评'],['导出时间',new Date().toLocaleString('zh-CN')],['计算公式','专业素质×60% + 思想道德×15% + 实践创新×15% + 身体心理×10%'],['数据范围',`已录入 ${people.length} 人；名单共 ${roster.length} 人`],['说明','课程明细、奖惩明细与汇总表均来自当前浏览器中的本地存档。']];
-  const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,16,18,11,11,11,11,11,11,28,10,10,10,10,10,10,10]},
+  const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,16,18,11,11,11,11,11,18,14,11,28,10,10,10,10,10,10,10]},
     {name:'课程明细',rows:courses,widths:[16,14,14,30,9,9,11,12]},{name:'奖惩明细',rows:entries,widths:[16,14,13,10,42,30,11,11,10,8,8,10]},
     {name:'说明',rows:notes,widths:[16,72]}]);
   downloadBlob('综合素质考评_全班整体_'+new Date().toISOString().slice(0,10)+'.xlsx',blob);
