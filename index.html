@@ -190,6 +190,74 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
 .tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:20px;
   background:var(--panel2);border:1px solid var(--line);color:var(--tx3);margin-left:5px}
 </style>
+<style id="minimal-redesign">
+:root{
+  --bg:#f6f7f9;--panel:#fff;--panel2:#f2f4f7;--line:#e2e6ec;
+  --tx:#17202a;--tx2:#52606f;--tx3:#7b8794;--acc:#1769e0;--acc2:#1769e0;
+  --plus:#16794d;--minus:#c43c3c;--warn:#9a6200;--r:16px;
+}
+html[data-theme="dark"]{
+  --bg:#111418;--panel:#191d22;--panel2:#22272e;--line:#303740;
+  --tx:#f2f4f7;--tx2:#c2c8d0;--tx3:#929ba6;--acc:#61a0ff;--acc2:#61a0ff;
+  --plus:#55c58a;--minus:#ff7b78;--warn:#f3c467;
+}
+body{background:var(--bg);letter-spacing:0}
+.wrap{max-width:1120px;padding:24px 20px 72px}
+.topbar{position:static;margin:0 0 16px;padding:20px;border:1px solid var(--line);border-radius:16px;
+  background:var(--panel);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+h1{font-size:23px;line-height:1.3}.sub{margin-top:5px;line-height:1.5}
+button,.btn{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 12px;font-weight:560;box-shadow:none}
+button:hover,.btn:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,var(--panel));transform:none}
+button.primary{background:var(--acc);border-color:var(--acc);box-shadow:none}
+.card,.total{border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.card{padding:22px 24px;margin-bottom:16px}.card>h2{font-size:18px;margin-bottom:7px}.card>.desc{font-size:13px;line-height:1.65;margin-bottom:16px}
+.total{display:grid;grid-template-columns:230px minmax(0,1fr);align-items:center;gap:18px;padding:22px 24px;color:var(--tx)}
+.total .big,.total .big small,.total .formula,.total .brk .k,.total .brk .c{color:inherit}
+.total .formula,.total .brk .k,.total .brk .c{opacity:1;color:var(--tx3)}
+.big{font-size:50px;color:var(--acc)!important}.brk{grid-template-columns:repeat(5,minmax(0,1fr));min-width:0;gap:8px}
+.total .brk>div{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px}
+.grid2{display:block}.grid2>.card{width:100%}
+.course-tools,.grade-import{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:12px}
+input,select,textarea{max-width:100%;min-height:38px;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+input[type=number]{width:100%;text-align:right}
+.entry{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:10px;margin:10px 0;padding:14px;border:1px solid var(--line);
+  border-radius:13px;background:var(--panel2);align-items:end}
+.entry .field{display:flex;min-width:0;flex-direction:column;gap:4px;color:var(--tx3);font-size:11px;font-weight:600}
+.entry .field select,.entry .field input{width:100%;min-width:0;background:var(--panel)}
+.entry .field-project{grid-column:span 5}.entry .field-memo{grid-column:span 4}.entry .field-score{grid-column:span 1}.entry .field-times{grid-column:span 1}.entry .field-factor{grid-column:span 1}
+.entry .field-proof{grid-column:span 2}.entry .photo-slot{grid-column:span 6;display:flex;align-items:center;gap:8px;min-height:40px}
+.entry .amt-wrap{grid-column:span 3;display:flex;align-items:center;justify-content:flex-end;gap:7px;color:var(--tx3);font-size:12px}
+.entry .amt{font-size:17px;color:var(--tx)}.entry .delete-entry{grid-column:span 1;justify-self:end;color:var(--minus)}
+.photo-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.photo-thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--line);cursor:pointer}
+.photo-name{max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx3);font-size:11px}
+.photo-remove{color:var(--minus);padding:5px 8px}.photo-add{padding:6px 9px}
+.photo-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.76)}
+.photo-modal.open{display:flex}.photo-modal img{display:block;max-width:min(1100px,94vw);max-height:88vh;border-radius:12px;background:#fff}
+.photo-modal button{position:fixed;right:20px;top:20px;background:#fff;color:#111;border:0}
+.sec{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:13px}
+.tally{background:var(--panel2);border:0;border-radius:11px;padding:12px 14px;margin-top:14px}
+.rbar{gap:9px}.rinfo{flex:1}.rbar>select{min-width:180px}.prog{background:var(--panel2)}
+.notes{padding-left:22px}table{table-layout:fixed}th,td{padding:9px 8px}
+@media(max-width:900px){
+  .wrap{padding:16px 14px 64px}.topbar>div:last-child{width:100%;display:flex;flex-wrap:wrap}.topbar button{width:auto}
+  .total{grid-template-columns:1fr}.brk{grid-template-columns:repeat(2,minmax(0,1fr))}.brk>div:last-child{grid-column:1/-1}
+  .entry .field-project{grid-column:span 7}.entry .field-memo{grid-column:span 5}.entry .field-score,.entry .field-times{grid-column:span 2}
+  .entry .field-factor{grid-column:span 4}.entry .field-proof{grid-column:span 4}.entry .photo-slot{grid-column:span 8}.entry .amt-wrap{grid-column:span 3}
+  .course-tools{display:grid;grid-template-columns:1fr 1fr}.course-tools>*{width:100%}.course-tools .hint{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .wrap{padding:8px 8px 48px}.topbar,.card,.total{border-radius:13px}.topbar,.card,.total{padding:16px 14px}
+  h1{font-size:20px}.topbar>div:last-child{display:grid;grid-template-columns:1fr 1fr}.topbar button{width:100%}
+  .big{font-size:42px}.brk{grid-template-columns:1fr 1fr}.brk .v{font-size:16px}
+  .rbar{display:grid;grid-template-columns:1fr 1fr}.rinfo,.rbar>select,.rbar>.row,.prog{grid-column:1/-1}.rbar>.row{display:grid;grid-template-columns:1fr 1fr;margin-left:0!important}
+  .course-tools{grid-template-columns:1fr}.course-tools .hint{grid-column:auto}
+  .entry{grid-template-columns:1fr 1fr;padding:12px}.entry .field,.entry .field-project,.entry .field-memo,.entry .field-factor,.entry .field-proof{grid-column:1/-1}
+  .entry .field-score,.entry .field-times{grid-column:span 1}.entry .photo-slot{grid-column:1/-1}.entry .amt-wrap{grid-column:1/2;justify-content:flex-start}.entry .delete-entry{grid-column:2/3}
+  #courseBody tr{display:grid;grid-template-columns:1fr 92px;gap:8px;padding:12px 0}#courseBody td{border:0;padding:0}
+  #courseBody td:first-child,#courseBody td:nth-child(3){grid-column:1/-1}#courseBody td:nth-child(3){display:flex;gap:8px}#courseBody td:last-child{grid-column:2;grid-row:2}
+  #courseBody input,#courseBody select{width:100%!important}table thead{display:none}.tally{gap:8px}.photo-name{max-width:125px}
+}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -335,27 +403,6 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
     <div id="tWarn"></div>
   </div>
 
-  <!-- 身体心理 -->
-  <div class="card">
-    <h2>四、身体心理素质 <span class="w">10%</span></h2>
-    <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。集体项目 / 团队竞赛按标准<strong>减半</strong>（用系数 0.5）。</p>
-    <div class="row" style="margin-bottom:6px">
-      <span style="font-size:12.5px;color:var(--tx2)">基础分</span>
-    <input type="number" id="pBase" value="70" min="0" max="70" step="0.5" oninput="recalc()">
-      <span class="hint">第二课堂等参与不足可酌情扣减</span>
-    </div>
-    <div class="sec"><span>奖励分项目（文体、心理类竞赛）</span><button class="sm" onclick="addEntry('physical','add')">+ 添加</button></div>
-    <div id="physicalAdd"></div>
-    <div class="sec"><span>惩罚分项目</span><button class="sm" onclick="addEntry('physical','sub')">+ 添加</button></div>
-    <div id="physicalSub"></div>
-    <div class="tally">
-      <span>基础 <b id="pB">70</b></span>
-      <span class="pos">＋奖励 <b id="pA">0</b></span>
-      <span class="neg">－惩罚 <b id="pS">0</b></span>
-      <span style="margin-left:auto">小计 <b id="pT">70.00</b></span>
-    </div>
-    <div id="pWarn"></div>
-  </div>
 </div>
 
 <!-- 实践创新 -->
@@ -377,12 +424,34 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
   <div id="iWarn"></div>
 </div>
 
+<!-- 身体心理 -->
+<div class="card">
+  <h2>四、身体心理素质 <span class="w">10%</span></h2>
+  <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。集体项目 / 团队竞赛按标准<strong>减半</strong>（用系数 0.5）。</p>
+  <div class="row" style="margin-bottom:6px">
+    <span style="font-size:12.5px;color:var(--tx2)">基础分</span>
+    <input type="number" id="pBase" value="70" min="0" max="70" step="0.5" oninput="recalc()">
+    <span class="hint">第二课堂等参与不足可酌情扣减</span>
+  </div>
+  <div class="sec"><span>奖励分项目（文体、心理类竞赛）</span><button class="sm" onclick="addEntry('physical','add')">+ 添加</button></div>
+  <div id="physicalAdd"></div>
+  <div class="sec"><span>惩罚分项目</span><button class="sm" onclick="addEntry('physical','sub')">+ 添加</button></div>
+  <div id="physicalSub"></div>
+  <div class="tally">
+    <span>基础 <b id="pB">70</b></span>
+    <span class="pos">＋奖励 <b id="pA">0</b></span>
+    <span class="neg">－惩罚 <b id="pS">0</b></span>
+    <span style="margin-left:auto">小计 <b id="pT">70.00</b></span>
+  </div>
+  <div id="pWarn"></div>
+</div>
+
 <div class="card">
   <h2>计算口径与易错点</h2>
   <ol class="notes">
     <li><b>以新细则为准。</b>制度汇编里的《本科生综合测评评选细则》是旧版（参照校发 2019〔82〕号）；院学工办〔2026〕1 号已全面改写加分项目与分值，赛事类别改按校发〔2025〕66 号认定。</li>
     <li><b>任职只取最高一项。</b>党支部支委、校院学生组织、心理协会、社团、辅导员助理、班委、寝室长，全部属于"任职"，互不叠加。</li>
-    <li><b>一票否决项。</b>违反四项基本原则、参与非法组织、网上发表不当言论等，思想道德素质总分直接为 0，并取消该学年评优评先资格。</li>
+    <li><b>思想道德直接归零。</b>违反四项基本原则、参与非法组织、网上发表不当言论等，思想道德素质总分直接评定为 0；是否另行取消资格由学院依据新细则审核确认。</li>
     <li><b>不加分的奖励</b>：凡以综合素质考评成绩为依据、或通过非竞赛途径 / 推荐评比产生的荣誉一律不加分——十佳大学生、优秀学生干部、文明大学生、各级组织内部评优、党员团员评优、国家奖助学金、社会奖助学金、社会实践先进个人、优秀青年志愿者等。</li>
     <li><b>证书时间以落款为准</b>，归属哪个学年就在哪个学年加 1 次，当时不申报以后不再补加。</li>
     <li><b>赛事等级</b>：挑战杯专项赛（红色专项、黑科技、揭榜挂帅、人工智能+）降一档认定——国赛奖项参照省赛，省赛奖项参照校赛。</li>
@@ -399,6 +468,11 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
   </details>
 </div>
 
+</div>
+
+<div class="photo-modal" id="photoModal" role="dialog" aria-modal="true" aria-label="材料照片预览" onclick="if(event.target===this)closePhoto()">
+  <button onclick="closePhoto()" aria-label="关闭照片预览">关闭</button>
+  <img id="photoModalImg" alt="材料照片预览">
 </div>
 
 <script>
@@ -454,7 +528,7 @@ const TS = CATALOG.thought.sub;
   .forEach(([n,v])=>push('thought','sub',{g:'处分与通报',n:n,v:v,h:'每人次'}));
 [['院级留校察看（学校标准减半）',15],['院级记过（减半）',12.5],['院级严重警告（减半）',10],['院级警告（减半）',7.5]]
   .forEach(([n,v])=>push('thought','sub',{g:'处分与通报',n:n,v:v,h:'院级处分参照学校标准减半扣分'}));
-push('thought','sub',{g:'诚信与考试',n:'恶意拖欠学费等不良诚信记录',v:15,h:'并取消评优评先资格'});
+push('thought','sub',{g:'诚信与考试',n:'恶意拖欠学费等不良诚信记录',v:15,h:'按2026年新细则扣15分；是否另行取消资格由学院审核'});
 push('thought','sub',{g:'诚信与考试',n:'新生校规校纪 / 安全法制 / 团员合格教育考试不及格',v:5,h:'每项次'});
 [['各种考勤缺勤',1],['上课迟到、早退',0.5],['无故旷课',3],['节假日 / 寒暑假未请假提前离校或推迟返校',4],
  ['未履行请假手续晚归宿',3],['未履行请假手续夜不归宿',6]]
@@ -527,7 +601,7 @@ CERTS.forEach(([n,v])=>push('innovation','add',{g:'专业技能 / 职业技能�
 push('innovation','add',{g:'专业技能 / 职业技能证书',n:'其他经学院审核认定的证书',v:10,cap:'cert',h:'单科成绩合格证不属此范围（驾驶证不算）'});
 const certTagRules=[[/^国家计算机/,'computerCert'],[/大学英语[四六]级/,'cetCert'],[/英语专业[四八]级/,'temCert'],[/^JLPT/,'jlptCert'],[/DELF|DALF|TCF/,'frenchCert'],[/ТРКИ|俄语专业/,'russianCert'],[/TOPIK/,'topikCert'],[/普通话/,'mandarinCert'],[/英语口译笔译等级/,'translationCert'],[/上海外语口译/,'shanghaiCert'],[/^BEC/,'becCert'],[/^雅思/,'ieltsCert'],[/^托福/,'toeflCert']];
 CATALOG.innovation.add.forEach(it=>{ if(it.cap==='cert'){ const r=certTagRules.find(([re])=>re.test(it.n)); if(r) it.tag=r[1]; } });
-push('innovation','add',{g:'社会实践',n:'个人参加社会实践（旧数据兼容，默认按暑假）',v:3,tag:'summerPractice',h:'新录入请优先选择后面的“寒假/暑假个人社会实践”'});
+push('innovation','add',{g:'社会实践',n:'个人参加暑假社会实践',v:3,tag:'summerPractice',h:'同一暑假参加多项社会实践不叠加，取最高'});
 push('innovation','add',{g:'社会实践',n:'暑期“三下乡”/ 女子军乐团集训 / 国旗护卫队集训',v:6,tag:'summerPractice',h:'不与暑期个人社会实践叠加，可与寒假实践叠加'});
 [['优秀实践队伍 · 院级',1],['优秀实践队伍 · 校级',2],['优秀实践队伍 · 省级',3],['优秀实践队伍 · 国家级',4]]
   .forEach(([n,v])=>push('innovation','add',{g:'社会实践',n:n,v:v,h:'团队成员；宣传报道、调研报告不额外加分'}));
@@ -574,6 +648,7 @@ const CLASS_COURSES = {
 
 /* ============ 状态 ============ */
 const KEY = 'jxnu-wgy-zpkh-2026';
+let storageWarned = false;
 let roster = [];                 // [{id, sid, name}]
 let store  = {};                 // id -> 该同学的数据
 let curId  = null;
@@ -731,6 +806,8 @@ function addEntry(mod, kind, data){
   if(!box) return;
   const wrap = document.createElement('div');
   wrap.className = 'entry';
+  wrap._photoData = data?.photo || '';
+  wrap._photoName = data?.photoName || '';
   const groups = [...new Set(list.map(i => i.g))];
   const html = groups.map(g => {
     const items = list.map((it, idx) => ({ it, idx })).filter(x => x.it.g === g);
@@ -740,23 +817,27 @@ function addEntry(mod, kind, data){
   }).join('');
   const factorOne = mod==='physical' ? '个人竞赛 ×1' : '全额 ×1';
   wrap.innerHTML = `
-    <select>${html}</select>
-    <input class="entry-memo" value="${esc(data?.memo||'')}" placeholder="项目/证书名称、日期或材料编号" title="用于同一项目去重与材料审核">
-    <input type="number" step="0.1" min="${list[data?.cat??0]?.min??0}" max="${list[data?.cat??0]?.max??list[data?.cat??0]?.v}" value="${data ? data.val : list[0].v}" title="分值（受细则范围约束）">
-    <input type="number" step="1" min="1" value="${data ? data.times : 1}" title="次数">
-    <select title="系数">
+    <label class="field field-project"><span>评分项目</span><select>${html}</select></label>
+    <label class="field field-memo"><span>项目名称 / 日期 / 材料编号</span><input class="entry-memo" value="${esc(data?.memo||'')}" placeholder="用于去重和审核"></label>
+    <label class="field field-score"><span>分值</span><input type="number" step="0.1" min="${list[data?.cat??0]?.min??0}" max="${list[data?.cat??0]?.max??list[data?.cat??0]?.v}" value="${data ? data.val : list[0].v}"></label>
+    <label class="field field-times"><span>次数</span><input type="number" step="1" min="1" value="${data ? data.times : 1}"></label>
+    <label class="field field-factor"><span>计分系数</span><select title="系数">
       <option value="1"${!data || data.k === 1 ? ' selected' : ''}>${factorOne}</option>
-      <option value="0.5"${data && data.k === 0.5 ? ' selected' : ''}>团队/集体/仅参加 ×0.5</option>
+      <option value="0.5"${data && data.k === 0.5 ? ' selected' : ''}>团队 / 集体 ×0.5</option>
       <option value="0.25"${data && data.k === 0.25 ? ' selected' : ''}>×0.25</option>
-      <option value="0.1"${data && data.k === 0.1 ? ' selected' : ''}>×0.1 线上</option>
-    </select>
-    <select class="proof" title="证明材料审核状态">
+      <option value="0.1"${data && data.k === 0.1 ? ' selected' : ''}>其他线上赛 ×0.1</option>
+    </select></label>
+    <label class="field field-proof"><span>材料状态</span><select class="proof" title="证明材料审核状态">
       <option value="pending"${!data || !data.proof || data.proof==='pending'?' selected':''}>待核验</option>
       <option value="verified"${data && data.proof==='verified'?' selected':''}>已核验</option>
       <option value="rejected"${data && data.proof==='rejected'?' selected':''}>不通过</option>
-    </select>
-    <div class="amt">0</div>
-    <button class="sm" onclick="this.closest('.entry').remove();readEntries();recalc()" title="删除">×</button>`;
+    </select></label>
+    <div class="photo-slot">
+      <input class="photo-input" type="file" accept="image/*" capture="environment" hidden onchange="attachPhoto(this)">
+      <div class="photo-actions"></div>
+    </div>
+    <div class="amt-wrap"><span>计入分</span><div class="amt">0</div></div>
+    <button class="sm delete-entry" onclick="this.closest('.entry').remove();readEntries();recalc()" title="删除本条">删除</button>`;
   if(data) wrap.querySelector('select').value = String(data.cat);
   const sel = wrap.querySelector('select');
   sel.onchange = () => {
@@ -764,10 +845,55 @@ function addEntry(mod, kind, data){
     valInput.min=it.min??0; valInput.max=it.max??it.v; valInput.value=it.v;
     readEntries(); recalc();
   };
-  wrap.querySelectorAll('input,select').forEach(el => el.addEventListener('input', () => { readEntries(); recalc(); }));
+  wrap.querySelectorAll('input:not([type=file]),select').forEach(el => el.addEventListener('input', () => { readEntries(); recalc(); }));
+  renderPhotoSlot(wrap);
   box.appendChild(wrap);
   if(!data){ readEntries(); recalc(); }
 }
+function renderPhotoSlot(entry){
+  const box=entry.querySelector('.photo-actions'); if(!box) return;
+  if(entry._photoData){
+    box.innerHTML=`<img class="photo-thumb" src="${entry._photoData}" alt="已上传材料照片" onclick="openPhoto(this.closest('.entry')._photoData)">
+      <span class="photo-name" title="${esc(entry._photoName||'材料照片')}">${esc(entry._photoName||'材料照片')}</span>
+      <button type="button" class="sm photo-add" onclick="this.closest('.entry').querySelector('.photo-input').click()">更换</button>
+      <button type="button" class="sm photo-remove" onclick="removePhoto(this)">移除</button>`;
+  }else{
+    box.innerHTML=`<button type="button" class="sm photo-add" onclick="this.closest('.entry').querySelector('.photo-input').click()">＋ 添加材料照片</button><span class="hint">自动压缩并离线保存</span>`;
+  }
+}
+function compressPhoto(file){
+  return new Promise((resolve,reject)=>{
+    if(!file || !file.type.startsWith('image/')){ reject(new Error('请选择图片文件')); return; }
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error('照片读取失败'));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('照片格式无法识别'));
+      img.onload=()=>{
+        const max=1000, scale=Math.min(1,max/Math.max(img.width,img.height));
+        const canvas=document.createElement('canvas'); canvas.width=Math.max(1,Math.round(img.width*scale)); canvas.height=Math.max(1,Math.round(img.height*scale));
+        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg',.74));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function attachPhoto(input){
+  const file=input.files?.[0]; if(!file) return;
+  const entry=input.closest('.entry');
+  try{
+    entry._photoData=await compressPhoto(file); entry._photoName=file.name;
+    renderPhotoSlot(entry); readEntries(); recalc();
+  }catch(e){ alert(e.message||'照片处理失败'); }
+  input.value='';
+}
+function removePhoto(button){
+  const entry=button.closest('.entry'); entry._photoData=''; entry._photoName=''; renderPhotoSlot(entry); readEntries(); recalc();
+}
+function openPhoto(src){ $('photoModalImg').src=src; $('photoModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closePhoto(){ $('photoModal').classList.remove('open'); $('photoModalImg').removeAttribute('src'); document.body.style.overflow=''; }
 function readEntries(){
   ['thought','innovation','physical'].forEach(mod=>{
     ['add','sub'].forEach(kind=>{
@@ -781,7 +907,8 @@ function readEntries(){
         if(Number(ins[0].value)!==val) ins[0].value=val;
         return { cat, val,
                  times:Math.max(0,parseFloat(ins[1].value)||0), k:parseFloat(sels[1].value),
-                 proof:sels[2]?.value||'pending', memo:e.querySelector('.entry-memo')?.value.trim()||'' };
+                 proof:sels[2]?.value||'pending', memo:e.querySelector('.entry-memo')?.value.trim()||'',
+                 photo:e._photoData||'', photoName:e._photoName||'' };
       });
     });
   });
@@ -900,10 +1027,9 @@ function recalc(){
   readEntries();
   const activeThoughtSubs=(state.entries?.thought?.sub||[]).filter(e=>e.proof!=='rejected');
   const hasElectric=activeThoughtSubs.some(e=>(itemOf('thought','sub',e.cat)?.n||'').includes('违规违章电器'));
-  const hasBadDebt=activeThoughtSubs.some(e=>(itemOf('thought','sub',e.cat)?.n||'').includes('恶意拖欠学费'));
-  if($('tZero').checked || hasElectric || hasBadDebt){
+  if(hasElectric){
     $('disqualified').checked=true;
-    if(!$('dqReason').value.trim()) $('dqReason').value=$('tZero').checked?'思想道德一票否决':hasElectric?'持有或使用违规违章电器':'恶意拖欠学费等不良诚信记录';
+    if(!$('dqReason').value.trim()) $('dqReason').value='持有或使用违规违章电器';
   }
   const bounded=(id,max)=>{ const el=$(id),v=Math.max(0,Math.min(max,parseFloat(el.value)||0)); if(Number(el.value)!==v) el.value=v; return v; };
   state.bases = { t: bounded('tBase',70), i: bounded('iBase',40), p: bounded('pBase',70) };
@@ -1095,8 +1221,11 @@ function clearRoster(){
 /* ============ 存取 ============ */
 function persist(){
   try{
-    localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:roster, 数据:store, 当前:curId }));
-  }catch(e){ console.warn('本地存储写入失败', e); }
+    localStorage.setItem(KEY, JSON.stringify({ v:4, 名册:roster, 数据:store, 当前:curId }));
+  }catch(e){
+    console.warn('本地存储写入失败', e);
+    if(!storageWarned){ storageWarned=true; alert('本地存储空间不足。请先导出数据备份，再移除部分材料照片。'); }
+  }
 }
 function restore(){
   const raw = localStorage.getItem(KEY); if(!raw) return false;
@@ -1104,6 +1233,12 @@ function restore(){
     const d = JSON.parse(raw);
     roster = d.名册 || [];
     store  = d.数据 || {};
+    Object.values(store).forEach(student=>{
+      const reason=student?.flags?.dqReason;
+      if(reason==='思想道德一票否决' || reason==='恶意拖欠学费等不良诚信记录'){
+        student.flags.disqualified=false; student.flags.dqReason='';
+      }
+    });
     curId  = d.当前 || (roster[0] && roster[0].id) || null;
     if(!roster.length){
       // 兼容旧版单人存档
@@ -1196,17 +1331,17 @@ function exportExcel(){
   people.forEach(({student:s,data:d})=>(d.courses||[]).forEach(c=>{
     if(Number.isFinite(c.credit)&&c.credit>0&&Number.isFinite(c.score)) courses.push([s.sid,s.name,c.code||'',c.name,c.credit,c.score,{'90':'优','80':'良','70':'中','60':'合格','0':'不合格'}[scoreGradeValue(c.score)]||'',r2(c.credit*c.score)]);
   }));
-  const entries=[['学号','姓名','模块','类型','项目','项目/证书名称及材料编号','材料状态','标准分','次数','系数','计入分']];
+  const entries=[['学号','姓名','模块','类型','项目','项目/证书名称及材料编号','材料状态','材料照片','标准分','次数','系数','计入分']];
   people.forEach(({student:s,data:d})=>{
     const z=computeScores(d), mods=[['thought','思想道德',z.t],['innovation','实践创新',z.i],['physical','身体心理',z.p]];
     mods.forEach(([mod,label,calc])=>{
-      (d.entries?.[mod]?.add||[]).forEach((e,i)=>{ const it=itemOf(mod,'add',e.cat)||{}; entries.push([s.sid,s.name,label,'奖励',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.val,e.times,e.k,calc.eff[i]??0]); });
-      (d.entries?.[mod]?.sub||[]).forEach(e=>{ const it=itemOf(mod,'sub',e.cat)||{}; entries.push([s.sid,s.name,label,'惩罚',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.val,e.times,e.k??1,e.proof==='rejected'?0:e.val*e.times*(e.k??1)]); });
+      (d.entries?.[mod]?.add||[]).forEach((e,i)=>{ const it=itemOf(mod,'add',e.cat)||{}; entries.push([s.sid,s.name,label,'奖励',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.photo?'已附照片':'无',e.val,e.times,e.k,calc.eff[i]??0]); });
+      (d.entries?.[mod]?.sub||[]).forEach(e=>{ const it=itemOf(mod,'sub',e.cat)||{}; entries.push([s.sid,s.name,label,'惩罚',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.photo?'已附照片':'无',e.val,e.times,e.k??1,e.proof==='rejected'?0:e.val*e.times*(e.k??1)]); });
     });
   });
   const notes=[['项目','内容'],['文件','江西师范大学外国语学院本科生综合素质考评'],['导出时间',new Date().toLocaleString('zh-CN')],['计算公式','专业素质×60% + 思想道德×15% + 实践创新×15% + 身体心理×10%'],['数据范围',`已录入 ${people.length} 人；名单共 ${roster.length} 人`],['说明','课程明细、奖惩明细与汇总表均来自当前浏览器中的本地存档。']];
   const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,16,18,11,11,11,11,11,11,28,10,10,10,10,10,10,10]},
-    {name:'课程明细',rows:courses,widths:[16,14,14,30,9,9,11,12]},{name:'奖惩明细',rows:entries,widths:[16,14,13,10,42,30,11,10,8,8,10]},
+    {name:'课程明细',rows:courses,widths:[16,14,14,30,9,9,11,12]},{name:'奖惩明细',rows:entries,widths:[16,14,13,10,42,30,11,11,10,8,8,10]},
     {name:'说明',rows:notes,widths:[16,72]}]);
   downloadBlob('综合素质考评_全班整体_'+new Date().toISOString().slice(0,10)+'.xlsx',blob);
 }
@@ -1229,10 +1364,10 @@ function importJSON(){
         if(Array.isArray(d.名册)){
           if(!d.名册.every(s => s && typeof s.id === 'string' && typeof s.name === 'string')) throw new Error('invalid roster');
           if(d.数据 !== undefined && (!d.数据 || typeof d.数据 !== 'object' || Array.isArray(d.数据))) throw new Error('invalid store');
-          localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:d.名册, 数据:d.数据||{}, 当前:d.当前||null }));
+          localStorage.setItem(KEY, JSON.stringify({ v:4, 名册:d.名册, 数据:d.数据||{}, 当前:d.当前||null }));
         }else{
           const id = newId();
-          localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:[{id,sid:'',name:'导入的同学'}],
+          localStorage.setItem(KEY, JSON.stringify({ v:4, 名册:[{id,sid:'',name:'导入的同学'}],
             数据:{ [id]: d.数据 || d }, 当前:id }));
         }
         location.reload();
