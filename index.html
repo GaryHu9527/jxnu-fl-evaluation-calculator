@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>江西师范大学外国语学院综合测评计算器</title>
+<style>
+:root{
+  --bg:#0f1216; --panel:#171b21; --panel2:#1d232b; --line:#2a323d;
+  --tx:#e6ebf2; --tx2:#98a4b3; --tx3:#6b7787;
+  --acc:#4a9eff; --acc2:#7c5cff;
+  --plus:#e5484d; --minus:#2fbf71; --warn:#f5a524;
+  --r:10px;
+}
+html[data-theme="light"]{
+  --bg:#f4f6f9; --panel:#ffffff; --panel2:#f7f9fc; --line:#dde3ec;
+  --tx:#1a2029; --tx2:#5b6776; --tx3:#8b97a6;
+  --acc:#1f6feb; --acc2:#6b46e5;
+  --plus:#d1242f; --minus:#12864b; --warn:#b8720a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
+h1{font-size:19px;margin:0 0 2px;letter-spacing:.3px}
+.sub{color:var(--tx3);font-size:12px;margin-bottom:18px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+button,.btn{cursor:pointer;font-family:inherit;font-size:13px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--tx);border-radius:8px;padding:6px 12px;transition:.15s}
+button:hover,.btn:hover{border-color:var(--acc);color:var(--acc)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff}
+button.primary:hover{opacity:.88;color:#fff}
+button.sm{padding:3px 8px;font-size:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.card>h2{font-size:15px;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+.card>h2 .w{font-size:11px;font-weight:600;color:var(--acc);background:color-mix(in srgb,var(--acc) 15%,transparent);
+  padding:2px 7px;border-radius:20px}
+.card>.desc{color:var(--tx3);font-size:12px;margin:0 0 12px}
+
+/* 总分卡 */
+.total{background:linear-gradient(135deg,var(--panel) 0%,var(--panel2) 100%);
+  border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;
+  display:flex;align-items:center;gap:26px;flex-wrap:wrap}
+.big{font-size:52px;font-weight:700;line-height:1;letter-spacing:-1px}
+.big small{font-size:16px;font-weight:500;color:var(--tx3);margin-left:4px}
+.formula{color:var(--tx3);font-size:12px;margin-top:6px;font-variant-numeric:tabular-nums}
+.brk{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;flex:1;min-width:420px}
+.brk div{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+.brk .k{font-size:11px;color:var(--tx3);margin-bottom:3px}
+.brk .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.brk .c{font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums}
+
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--tx3);font-weight:500;font-size:12px}
+input,select{background:var(--bg);border:1px solid var(--line);color:var(--tx);
+  border-radius:7px;padding:5px 8px;font:inherit;font-size:13px;outline:none}
+input:focus,select:focus{border-color:var(--acc)}
+input.invalid{border-color:var(--plus);box-shadow:0 0 0 2px color-mix(in srgb,var(--plus) 16%,transparent)}
+input[type=number]{width:74px;font-variant-numeric:tabular-nums;text-align:right}
+input.wide{width:100%}
+select{max-width:100%}
+.entry{display:grid;grid-template-columns:minmax(210px,1.5fr) minmax(130px,1fr) 76px 62px 92px 82px 72px 28px;gap:7px;
+  align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.entry:last-child{border-bottom:none}
+.entry .amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.entry .amt.zero{color:var(--tx3);font-weight:400;text-decoration:line-through}
+.entry .amt.cap{color:var(--warn)}
+.entry select{font-size:12.5px}
+.hint{color:var(--tx3);font-size:11.5px;margin-top:3px}
+.sec{font-size:12px;color:var(--tx2);font-weight:600;margin:14px 0 4px;display:flex;
+  align-items:center;justify-content:space-between;gap:8px}
+.sec:first-of-type{margin-top:6px}
+.empty{color:var(--tx3);font-size:12px;padding:8px 0;font-style:italic}
+.tally{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--line);font-size:13px;font-variant-numeric:tabular-nums}
+.tally b{font-weight:600}
+.pos{color:var(--plus)} .neg{color:var(--minus)} .mut{color:var(--tx3)}
+.warnbox{background:color-mix(in srgb,var(--warn) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);color:var(--warn);
+  border-radius:8px;padding:7px 11px;font-size:12px;margin-top:10px}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--tx2);font-size:12.5px;padding:4px 0}
+summary:hover{color:var(--acc)}
+label.ck{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--tx2);cursor:pointer}
+input[type=checkbox]{width:15px;height:15px;accent-color:var(--acc);cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){
+  .grid2{grid-template-columns:1fr}
+  .entry{grid-template-columns:1fr 1fr 66px 56px 82px 76px 66px 26px;gap:5px}
+  .entry select{font-size:12px}
+  .big{font-size:40px}
+}
+@media(max-width:520px){
+  .wrap{padding:12px 10px 60px}
+  .card{padding:13px 12px}
+  .total{padding:15px;gap:16px}
+  .brk{grid-template-columns:1fr 1fr;min-width:0;width:100%}
+  .entry{grid-template-columns:minmax(0,1fr) minmax(0,.8fr) 60px 48px 72px 70px 58px 26px}
+  .entry select,.entry input{min-width:0;width:100%}
+  table{display:block;overflow-x:auto}
+}
+@media print{
+  :root,html[data-theme="light"]{--bg:#fff;--panel:#fff;--panel2:#fff;--line:#bbb;--tx:#111;--tx2:#333;--tx3:#555}
+  body{font-size:11px}.wrap{max-width:none;padding:0}.topbar button,.rbar button,.importbox,.card button{display:none!important}
+  .card,.total{break-inside:avoid;box-shadow:none}.entry{grid-template-columns:1fr 1fr 72px 55px 68px 72px 60px}.entry button{display:none}
+  details{display:none}
+}
+
+/* Apple 风格视觉层 */
+:root{
+  --bg:#f5f5f7;--panel:rgba(255,255,255,.88);--panel2:#f5f5f7;--line:rgba(60,60,67,.14);
+  --tx:#1d1d1f;--tx2:#515154;--tx3:#86868b;--acc:#0071e3;--acc2:#5856d6;
+  --plus:#ff3b30;--minus:#34c759;--warn:#b45f06;--r:20px;
+}
+html[data-theme="dark"]{
+  --bg:#000;--panel:rgba(28,28,30,.88);--panel2:#1c1c1e;--line:rgba(255,255,255,.14);
+  --tx:#f5f5f7;--tx2:#d1d1d6;--tx3:#98989d;--acc:#2997ff;--acc2:#7d7aff;
+  --plus:#ff453a;--minus:#30d158;--warn:#ffd60a;
+}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{background:
+  radial-gradient(circle at 12% -5%,color-mix(in srgb,var(--acc) 10%,transparent),transparent 32rem),
+  radial-gradient(circle at 92% 5%,color-mix(in srgb,var(--acc2) 8%,transparent),transparent 28rem),var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;
+  letter-spacing:-.01em}
+.wrap{max-width:1180px;padding:28px 24px 96px}
+.topbar{position:sticky;top:12px;z-index:20;align-items:center;margin-bottom:20px;padding:14px 16px;
+  border:1px solid var(--line);border-radius:22px;background:color-mix(in srgb,var(--panel) 86%,transparent);
+  box-shadow:0 12px 40px rgba(0,0,0,.08);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px)}
+h1{font-size:22px;font-weight:650;letter-spacing:-.03em}.sub{margin:2px 0 0;font-size:12px}
+button,.btn{border:0;background:color-mix(in srgb,var(--tx) 7%,transparent);border-radius:999px;padding:8px 14px;font-weight:520}
+button:hover,.btn:hover{background:color-mix(in srgb,var(--tx) 11%,transparent);color:var(--tx);transform:translateY(-1px)}
+button:active,.btn:active{transform:scale(.98)}
+button.primary{background:var(--acc);box-shadow:0 3px 10px color-mix(in srgb,var(--acc) 25%,transparent)}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:16px;
+  background:var(--panel);box-shadow:0 8px 30px rgba(0,0,0,.055);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.card>h2{font-size:17px;letter-spacing:-.02em}.card>h2 .w{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.total{border:0;border-radius:26px;padding:24px;background:linear-gradient(135deg,#0071e3,#5856d6 70%,#af52de);
+  color:#fff;box-shadow:0 18px 46px rgba(0,113,227,.22)}
+.total .big,.total .big small,.total .formula,.total .brk .k,.total .brk .c{color:#fff}
+.total .formula,.total .brk .k,.total .brk .c{opacity:.72}.total .brk div{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16)}
+.big{font-size:58px;letter-spacing:-.055em}.brk .v{font-size:19px}
+input,select,textarea{background:color-mix(in srgb,var(--bg) 72%,transparent);border:1px solid var(--line);border-radius:11px;padding:7px 10px}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 15%,transparent)}
+.course-tools,.grade-import{border:0;background:color-mix(in srgb,var(--tx) 4%,transparent);border-radius:15px;padding:12px}
+.entry{border-bottom-color:color-mix(in srgb,var(--line) 70%,transparent)}
+th{font-weight:600;color:var(--tx2)}.prog{height:7px;border:0}.prog i{border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+
+@media(max-width:800px){
+  .wrap{padding:12px 12px 76px}.topbar{position:relative;top:auto;padding:16px;margin-bottom:14px}.topbar>div:last-child{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .topbar button{width:100%;padding:10px 8px}.total{padding:20px}.brk{grid-template-columns:1fr 1fr;min-width:0;width:100%}.grid2{grid-template-columns:1fr}
+  .rbar{display:grid;grid-template-columns:1fr 1fr}.rinfo,.rbar>select,.rbar>.row{grid-column:1/-1}.rbar>.row{margin-left:0!important;display:grid;grid-template-columns:1fr 1fr}
+  .course-tools{display:grid;grid-template-columns:1fr 1fr}.course-tools select{min-width:0;width:100%}.course-tools .hint{grid-column:1/-1}
+}
+@media(max-width:560px){
+  .wrap{padding:8px 8px 64px}.card{padding:16px 14px;border-radius:18px}.topbar{border-radius:18px}.total{border-radius:22px}.big{font-size:48px}
+  .brk{gap:7px}.brk div{padding:8px}.brk .v{font-size:16px}.course-tools{grid-template-columns:1fr}.course-tools>*{width:100%}
+  table{display:table;overflow:visible}#courseBody tr{display:grid;grid-template-columns:1fr 82px;gap:7px;padding:10px 0;border-bottom:1px solid var(--line)}
+  #courseBody td{display:block;border:0;padding:0}#courseBody td:first-child{grid-column:1/-1}#courseBody td:nth-child(3){grid-column:1/-1;display:flex;gap:7px}
+  #courseBody td:nth-child(3) input,#courseBody td:nth-child(3) select{flex:1;width:auto!important}#courseBody td:last-child{grid-column:2;grid-row:2;text-align:right}
+  #courseBody td:last-child button{width:100%}#courseBody input.wide{width:100%}#courseBody input[type=number]{width:100%}
+  #courseBody~*{} table thead{display:none}.entry{grid-template-columns:minmax(0,1fr) 58px 48px}.entry select:first-child,.entry .entry-memo{grid-column:1/-1}.entry>*:nth-child(n+5){margin-top:2px}
+  .entry .amt{align-self:center}.tally{gap:9px;font-size:12px}
+}
+/* 名册 */
+.roster{padding:14px 18px}
+.rbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rinfo{min-width:150px}
+.rname{font-size:16px;font-weight:600;line-height:1.35}
+.rpos{font-size:11.5px;color:var(--tx3)}
+.prog{height:6px;background:var(--bg);border:1px solid var(--line);border-radius:20px;
+  overflow:hidden;margin-top:11px}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .25s}
+.importbox{margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
+textarea{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--tx);
+  border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;line-height:1.7;
+  resize:vertical;outline:none}
+textarea:focus{border-color:var(--acc)}
+.course-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 12px;padding:10px;
+  background:var(--panel2);border:1px solid var(--line);border-radius:9px}
+.course-tools select{min-width:150px}
+.grade-import{margin:10px 0 0;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:9px}
+.grade-import textarea{margin:7px 0}
+ol.notes li{margin-bottom:7px;color:var(--tx2);font-size:12.5px}
+ol.notes b{color:var(--tx)}
+code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:12px}
+.tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:20px;
+  background:var(--panel2);border:1px solid var(--line);color:var(--tx3);margin-left:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <div>
+    <h1>江西师范大学外国语学院综合测评计算器</h1>
+    <div class="sub">依据《江西师范大学外国语学院本科生综合素质考评细则》（院学工办〔2026〕1 号）· 2026-01-01 施行</div>
+  </div>
+  <div class="row">
+    <button onclick="toggleTheme()">切换主题</button>
+    <button class="primary" onclick="exportExcel()">导出 Excel</button>
+    <button onclick="exportJSON()">备份数据</button>
+    <button onclick="importJSON()">导入</button>
+    <button onclick="window.print()">打印</button>
+    <button class="sm" onclick="resetAll()">清空</button>
+  </div>
+</div>
+
+<!-- 名册 -->
+<div class="card roster">
+  <div class="rbar">
+    <button onclick="prevStudent()" title="快捷键 ←">← 上一位</button>
+    <button class="primary" onclick="nextStudent()" title="快捷键 →">下一位 →</button>
+    <div class="rinfo">
+      <div class="rname" id="rName">未导入名单</div>
+      <div class="rpos" id="rPos">导入名单后可逐人录入、自动存档</div>
+    </div>
+    <select id="rJump" onchange="if(this.value)loadStudent(this.value)" title="快速跳转"></select>
+    <div class="row" style="margin-left:auto">
+      <button onclick="toggleImport()">导入名单</button>
+      <button onclick="exportExcel()">导出全班 Excel</button>
+    </div>
+  </div>
+  <div class="prog" id="rProg" title="已录入人数"><i style="width:0%"></i></div>
+  <div class="importbox" id="importBox" style="display:none">
+    <p class="desc">每行一位同学。支持 <code>学号 姓名</code>、<code>姓名,学号</code>，或只写姓名；分隔符可用逗号、空格或制表符，也能直接从 Excel 复制一整列粘贴进来。重复导入时会按学号/姓名自动匹配，已录的数据不会丢。录入时按键盘 <code>←</code> <code>→</code> 可快速切换上一位、下一位。</p>
+    <textarea id="rosterText" rows="8" placeholder="2023010101 张三&#10;2023010102 李四&#10;王五"></textarea>
+    <div class="row" style="margin-top:9px">
+      <button class="primary" onclick="doImport()">导入</button>
+      <button onclick="pickRosterFile()">从文件导入（.txt / .csv）</button>
+      <label class="ck"><input type="checkbox" id="appendMode">追加到现有名单</label>
+      <button class="sm" onclick="clearRoster()">清空名单</button>
+      <span class="hint" id="importHint"></span>
+    </div>
+  </div>
+</div>
+
+<div class="total">
+  <div>
+    <div class="big" id="total">0.00<small>分</small></div>
+    <div class="formula" id="formula">专业×60% ＋ 思想道德×15% ＋ 实践创新×15% ＋ 身体心理×10%</div>
+  </div>
+  <div class="brk">
+    <div><div class="k">专业素质 60%</div><div class="v" id="s1">0.00</div><div class="c" id="c1">贡献 0.00</div></div>
+    <div><div class="k">思想道德 15%</div><div class="v" id="s2">0.00</div><div class="c" id="c2">贡献 0.00</div></div>
+    <div><div class="k">实践创新 15%</div><div class="v" id="s3">0.00</div><div class="c" id="c3">贡献 0.00</div></div>
+    <div><div class="k">身体心理 10%</div><div class="v" id="s4">0.00</div><div class="c" id="c4">贡献 0.00</div></div>
+    <div><div class="k">操行素质 40%</div><div class="v" id="s5">0.00</div><div class="c" id="c5">当前排名 —</div></div>
+  </div>
+</div>
+
+<div class="card" style="padding:14px 18px">
+  <div class="row">
+    <b>评定状态</b>
+    <span class="hint" id="rankInfo">专业排名 —　操行排名 —　综合排名 —</span>
+    <label class="ck" style="margin-left:auto"><input type="checkbox" id="disqualified" onchange="recalc()">取消本学年评奖评优资格</label>
+    <input class="wide" id="dqReason" placeholder="资格取消原因或审核备注" oninput="recalc()" style="max-width:300px">
+  </div>
+</div>
+
+<!-- 专业素质 -->
+<div class="card">
+  <h2>一、专业素质 <span class="w">60%</span></h2>
+  <p class="desc">总平均学分值 = Σ（课程分数 × 课程学分）÷ Σ课程学分。公共选修课<strong>不计入</strong>；等次换算：优 90 / 良 80 / 中 70 / 合格 60 / 不合格 0。结果保留 2 位小数。</p>
+  <div class="course-tools">
+    <select id="classPreset" aria-label="班级">
+      <option value="finance">商务英语（国际金融）班</option>
+      <option value="accounting">商务英语（国际会计）班</option>
+      <option value="business">商务英语（跨国商务）班</option>
+      <option value="english">英语班</option>
+      <option value="japanese">日语班</option>
+      <option value="french">法语班</option>
+      <option value="russian">俄语班</option>
+    </select>
+    <select id="yearPreset" aria-label="学年">
+      <option value="1">2025—2026学年（第1—2学期）</option>
+    </select>
+    <button class="primary" onclick="importPresetCourses()">导入班级课程</button>
+    <button onclick="toggleGradeImport()">一键导入成绩</button>
+    <span class="hint" id="presetHint" role="status"></span>
+  </div>
+  <div class="grade-import" id="gradeImportBox" style="display:none">
+    <b>粘贴成绩</b>
+    <div class="hint">每行一门，支持“课程号　课程名　学分　成绩”“课程名　学分　成绩”，也支持从 Excel / 教务系统直接复制；成绩可写数字或优、良、中、合格、不合格。</div>
+    <textarea id="gradeText" rows="7" placeholder="252012　综合英语Ⅰ　4　88&#10;英语视听说Ⅰ　2　优"></textarea>
+    <div class="row">
+      <button class="primary" onclick="importGrades()">立即导入</button>
+      <label class="ck"><input type="checkbox" id="gradeReplace">导入前清空现有课程</label>
+      <span class="hint" id="gradeHint" role="status"></span>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th style="width:44%">课程名称</th><th style="width:18%">学分</th><th style="width:26%">成绩 / 等次</th><th style="width:12%"></th></tr></thead>
+    <tbody id="courseBody"></tbody>
+  </table>
+  <div class="row" style="margin-top:10px">
+    <button class="primary" onclick="addCourse()">+ 添加课程</button>
+    <button onclick="clearCourses()">清空课程</button>
+    <span class="hint" id="courseHint" role="status" style="margin:0 0 0 auto"></span>
+  </div>
+  <div class="tally">
+    <span>课程门数：<b id="nCourse">0</b></span>
+    <span>总学分：<b id="nCredit">0</b></span>
+    <span>总平均学分值：<b class="pos" id="avgCredit">0.00</b></span>
+  </div>
+</div>
+
+<div class="grid2">
+  <!-- 思想道德 -->
+  <div class="card">
+    <h2>二、思想道德素质 <span class="w">15%</span></h2>
+    <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。</p>
+    <div class="row" style="margin-bottom:6px">
+      <span style="font-size:12.5px;color:var(--tx2)">基础分</span>
+      <input type="number" id="tBase" value="70" min="0" max="70" step="0.5" oninput="recalc()">
+      <span class="hint">未达标项由班级考评小组酌情扣减</span>
+    </div>
+    <div class="sec"><span>奖励分项目</span><button class="sm" onclick="addEntry('thought','add')">+ 添加</button></div>
+    <div id="thoughtAdd"></div>
+    <div class="sec"><span>惩罚分项目</span><button class="sm" onclick="addEntry('thought','sub')">+ 添加</button></div>
+    <div id="thoughtSub"></div>
+    <div style="margin-top:10px">
+      <label class="ck"><input type="checkbox" id="tPostMax" checked disabled>任职类强制不叠加，仅取最高一项（细则注 2）</label>
+      <div style="margin-top:5px"><label class="ck"><input type="checkbox" id="tZero" onchange="recalc()">触发一票否决：思想道德总分直接评定为 0 分</label></div>
+    </div>
+    <div class="tally">
+      <span>基础 <b id="tB">70</b></span>
+      <span class="pos">＋奖励 <b id="tA">0</b></span>
+      <span class="neg">－惩罚 <b id="tS">0</b></span>
+      <span style="margin-left:auto">小计 <b id="tT">70.00</b></span>
+    </div>
+    <div id="tWarn"></div>
+  </div>
+
+  <!-- 身体心理 -->
+  <div class="card">
+    <h2>四、身体心理素质 <span class="w">10%</span></h2>
+    <p class="desc">基础分 70 ＋ 奖励分（上限 30）－ 惩罚分。满分 100。集体项目 / 团队竞赛按标准<strong>减半</strong>（用系数 0.5）。</p>
+    <div class="row" style="margin-bottom:6px">
+      <span style="font-size:12.5px;color:var(--tx2)">基础分</span>
+    <input type="number" id="pBase" value="70" min="0" max="70" step="0.5" oninput="recalc()">
+      <span class="hint">第二课堂等参与不足可酌情扣减</span>
+    </div>
+    <div class="sec"><span>奖励分项目（文体、心理类竞赛）</span><button class="sm" onclick="addEntry('physical','add')">+ 添加</button></div>
+    <div id="physicalAdd"></div>
+    <div class="sec"><span>惩罚分项目</span><button class="sm" onclick="addEntry('physical','sub')">+ 添加</button></div>
+    <div id="physicalSub"></div>
+    <div class="tally">
+      <span>基础 <b id="pB">70</b></span>
+      <span class="pos">＋奖励 <b id="pA">0</b></span>
+      <span class="neg">－惩罚 <b id="pS">0</b></span>
+      <span style="margin-left:auto">小计 <b id="pT">70.00</b></span>
+    </div>
+    <div id="pWarn"></div>
+  </div>
+</div>
+
+<!-- 实践创新 -->
+<div class="card">
+  <h2>三、实践创新素质 <span class="w">15%</span></h2>
+  <p class="desc">基础分 40 ＋ 奖励分（上限 60）。满分 100。证书类每学年累计 ≤ 20（每项 ≤ 10）；作品类累计 ≤ 20；专业讲座 ≤ 5；学子大讲堂主讲 ≤ 6；招聘会 ≤ 10；未获奖参赛材料 ≤ 3；专利只计最高一项。</p>
+  <div class="row" style="margin-bottom:6px">
+    <span style="font-size:12.5px;color:var(--tx2)">基础分</span>
+    <input type="number" id="iBase" value="40" min="0" max="40" step="0.5" oninput="recalc()">
+    <span class="hint">不按规定参加课外学术科技活动、专业竞赛、专业社会实践的酌情扣减</span>
+  </div>
+  <div class="sec"><span>奖励分项目</span><button class="sm" onclick="addEntry('innovation','add')">+ 添加</button></div>
+  <div id="innovationAdd"></div>
+  <div class="tally">
+    <span>基础 <b id="iB">40</b></span>
+    <span class="pos">＋奖励 <b id="iA">0</b></span>
+    <span style="margin-left:auto">小计 <b id="iT">40.00</b></span>
+  </div>
+  <div id="iWarn"></div>
+</div>
+
+<div class="card">
+  <h2>计算口径与易错点</h2>
+  <ol class="notes">
+    <li><b>以新细则为准。</b>制度汇编里的《本科生综合测评评选细则》是旧版（参照校发 2019〔82〕号）；院学工办〔2026〕1 号已全面改写加分项目与分值，赛事类别改按校发〔2025〕66 号认定。</li>
+    <li><b>任职只取最高一项。</b>党支部支委、校院学生组织、心理协会、社团、辅导员助理、班委、寝室长，全部属于"任职"，互不叠加。</li>
+    <li><b>一票否决项。</b>违反四项基本原则、参与非法组织、网上发表不当言论等，思想道德素质总分直接为 0，并取消该学年评优评先资格。</li>
+    <li><b>不加分的奖励</b>：凡以综合素质考评成绩为依据、或通过非竞赛途径 / 推荐评比产生的荣誉一律不加分——十佳大学生、优秀学生干部、文明大学生、各级组织内部评优、党员团员评优、国家奖助学金、社会奖助学金、社会实践先进个人、优秀青年志愿者等。</li>
+    <li><b>证书时间以落款为准</b>，归属哪个学年就在哪个学年加 1 次，当时不申报以后不再补加。</li>
+    <li><b>赛事等级</b>：挑战杯专项赛（红色专项、黑科技、揭榜挂帅、人工智能+）降一档认定——国赛奖项参照省赛，省赛奖项参照校赛。</li>
+    <li><b>线上答题比赛</b>：A/B 类线上赛按标准正常加分；有含金量的普通赛 ×0.5；其他线上赛 ×0.1。</li>
+    <li><b>大四学年</b>：新细则未保留旧版"基础分 80 + 就业考研 20"的口径，专业素质统一按课程加权平均计算；考勤含校院组织的就业动员和指导会。</li>
+    <li><b>四舍五入</b>：总平均学分值保留 2 位小数（四舍五入）；各项小计与总分同样保留 2 位。</li>
+    <li><b>成绩证明</b>：论文、作品需刊物原件（录用通知无效）；专利须学生为发明人、江西师范大学为申请人并有专利证书。</li>
+    <li><b>材料核验。</b>每条奖惩项目可填写项目名称、证书日期或材料编号，并标记待核验、已核验或不通过；不通过的项目自动归零。</li>
+    <li><b>三类排名。</b>系统分别计算专业素质排名、操行素质排名和综合排名；操行素质按思想道德15%、实践创新15%、身体心理10%折算至百分制。</li>
+  </ol>
+  <details>
+    <summary>查看分值速查表（竞赛 / 文体）</summary>
+    <div id="refTables" style="margin-top:8px;font-size:12px;overflow-x:auto"></div>
+  </details>
+</div>
+
+</div>
+
+<script>
+/* ============ 数据目录 ============ */
+const CATALOG = { thought:{add:[],sub:[]}, innovation:{add:[]}, physical:{add:[],sub:[]} };
+const POST = 'post';          // 任职，取最高
+const MAXG = { post:1, grouphonor:1, grouphonorExtra:1, dormhonor:1, patent:1,
+  notable:1, physicalEvent:1, computerCert:1, cetCert:1, temCert:1, jlptCert:1,
+  frenchCert:1, russianCert:1, topikCert:1, mandarinCert:1, translationCert:1,
+  shanghaiCert:1, becCert:1, ieltsCert:1, toeflCert:1, summerPractice:1,
+  winterPractice:1, researchOutcome:1 };
+const CAPS = {
+  thought:   { volunteer:5, __add:30 },
+  innovation:{ cert:20, work:20, lecture:5, forum:6, jobfair:10, noaward:3, __add:60 },
+  physical:  { __add:30 }
+};
+const CAP_LABEL = { volunteer:'志愿活动', cert:'证书', work:'发表作品', lecture:'专业讲座',
+                    forum:'学子大讲堂主讲', jobfair:'招聘会', noaward:'未获奖参赛材料' };
+
+function push(m,k,o){ CATALOG[m][k].push(o); return o; }
+
+/* --- 思想道德 · 奖励 --- */
+const TA = CATALOG.thought.add;
+push('thought','add',{g:'积极向党组织靠拢',n:'入党积极分子（满 1 学期，考核合格）',v:2,h:'0-2 分，由学院学生党支部鉴定并提供加分条'});
+push('thought','add',{g:'积极向党组织靠拢',n:'中共（预备）党员（考核合格）',v:5,h:'3-5 分，四年只能各加一次'});
+push('thought','add',{g:'学生党支部支委',n:'学生党支部副书记',v:6,tag:POST,h:'5-6 分'});
+push('thought','add',{g:'学生党支部支委',n:'学生党支部其他支委',v:4,tag:POST,h:'3-4 分'});
+push('thought','add',{g:'突出事迹',n:'见义勇为、助人为乐等 · 国家级表彰',v:15,tag:'notable',h:'最高 15 分，同一事迹取最高'});
+push('thought','add',{g:'突出事迹',n:'见义勇为、助人为乐等 · 省级表彰',v:10,tag:'notable'});
+push('thought','add',{g:'突出事迹',n:'见义勇为、助人为乐等 · 校级表彰',v:5,tag:'notable'});
+push('thought','add',{g:'突出事迹',n:'见义勇为、助人为乐等 · 院级表彰',v:2,tag:'notable'});
+push('thought','add',{g:'突出事迹',n:'捐献骨髓',v:10});
+push('thought','add',{g:'突出事迹',n:'义务献血',v:2,h:'每次 2 分'});
+[['主席团、执行团等正职',10],['副职',9],['部长',7],['副部长',6],['学干',5]]
+  .forEach(([n,v])=>push('thought','add',{g:'校院两级学生组织',n:n,v:v,tag:POST,h:'团委、学生会、新媒体运营中心、党员服务站、大学生自主管理委员会等'}));
+[['心理协会 · 会长',8],['心理协会 · 部长',6],['心理协会 · 学干',4]]
+  .forEach(([n,v])=>push('thought','add',{g:'心理协会',n:n,v:v,tag:POST}));
+[['理事长、团支书',7],['副理事长',6],['部长',5],['副部长',4],['学干',3]]
+  .forEach(([n,v])=>push('thought','add',{g:'校院两级学生社团',n:n,v:v,tag:POST,h:'以上一年度年审结果为准；啦啦队（舞蹈队）、礼仪队、辩论团参照社团'}));
+[['辅导员助理、新生助导员',8],['班长',8],['团支书',8],['学习委员',7],['纪律委员',6],['其他班委',5],['寝室长',2]]
+  .forEach(([n,v])=>push('thought','add',{g:'班委任职',n:n,v:v,tag:POST}));
+push('thought','add',{g:'志愿活动',n:'志愿者活动（有签到记录或证明）',v:0.5,cap:'volunteer',h:'每次 0.5 分，累计不超过 5 分'});
+[['院级',1,0.5],['校级',2,1],['省级',4,2],['国家级',8,4]].forEach(([lv,v,b])=>{
+  push('thought','add',{g:'集体荣誉',n:'班级/团支部获评红色班级、优秀班集体、五四红旗团支部 · '+lv,v:v,tag:'grouphonor',h:'同一类别取最高加分'});
+  push('thought','add',{g:'集体荣誉',n:'班委额外加分 · '+lv,v:b,tag:'grouphonorExtra',h:'所在班级获评后，班委在此基数上额外加 '+b+' 分；同一类别取最高'});
+});
+push('thought','add',{g:'文明寝室',n:'院级文明寝室（寝室成员）',v:0.5,tag:'dormhonor'});
+push('thought','add',{g:'文明寝室',n:'校级文明寝室（寝室成员）',v:1,tag:'dormhonor'});
+
+/* --- 思想道德 · 惩罚（存正值，计算时取负） --- */
+const TS = CATALOG.thought.sub;
+[['留校察看处分',30],['记过处分',25],['严重警告处分',20],['警告处分',15],['校级通报批评',10],['院级通报批评',5]]
+  .forEach(([n,v])=>push('thought','sub',{g:'处分与通报',n:n,v:v,h:'每人次'}));
+[['院级留校察看（学校标准减半）',15],['院级记过（减半）',12.5],['院级严重警告（减半）',10],['院级警告（减半）',7.5]]
+  .forEach(([n,v])=>push('thought','sub',{g:'处分与通报',n:n,v:v,h:'院级处分参照学校标准减半扣分'}));
+push('thought','sub',{g:'诚信与考试',n:'恶意拖欠学费等不良诚信记录',v:15,h:'并取消评优评先资格'});
+push('thought','sub',{g:'诚信与考试',n:'新生校规校纪 / 安全法制 / 团员合格教育考试不及格',v:5,h:'每项次'});
+[['各种考勤缺勤',1],['上课迟到、早退',0.5],['无故旷课',3],['节假日 / 寒暑假未请假提前离校或推迟返校',4],
+ ['未履行请假手续晚归宿',3],['未履行请假手续夜不归宿',6]]
+  .forEach(([n,v])=>push('thought','sub',{g:'日常管理',n:n,v:v,h:'每次'}));
+[['寝室持有或使用违规违章电器',5],['寝室长 / 学生干部 / 党员等知情不报',1]]
+  .forEach(([n,v])=>push('thought','sub',{g:'寝室管理',n:n,v:v,h:'每次；使用违规电器同时取消该学年所有评奖评优资格'}));
+[['院级查寝 · 卫生不达标（寝室成员）',1],['院级查寝 · 因个别成员影响（该成员）',2],
+ ['校级卫生检查通报 · 寝室成员',2],['校级卫生检查通报 · 直接责任人',5],['查寝时不配合',3]]
+  .forEach(([n,v])=>push('thought','sub',{g:'寝室管理',n:n,v:v,h:'每次'}));
+
+/* --- 实践创新 · 奖励 --- */
+const IA = CATALOG.innovation.add;
+[['第二专业总平均 ≥ 90 分',10],['第二专业总平均 80–90 分',8],['第二专业总平均 60–80 分',5],['第二专业总平均 ＜ 60 分',0]]
+  .forEach(([n,v])=>push('innovation','add',{g:'第二专业',n:n,v:v,h:'有挂科不予加分'}));
+
+const INNO = {'国家级金奖':[40,20,10],'国家级银奖':[30,15,7.5],'国家级铜奖':[25,10,5],
+              '省级金奖':[25,10,5],'省级银奖':[20,7.5,0],'省级铜奖':[15,5,0],
+              '校级金奖':[15,5,0],'校级银奖':[8,2.5,0],'校级铜奖':[6,1,0]};
+const RANKS = ['排序 1-5 名','排序 6-10 名','排序 11-15 名'];
+Object.entries(INNO).forEach(([lv,arr])=>arr.forEach((v,i)=>{
+  push('innovation','add',{g:'①中国国际大学生创新大赛',n:lv+' · '+RANKS[i],v:v});
+}));
+Object.entries(INNO).forEach(([lv,arr])=>arr.forEach((v,i)=>{
+  push('innovation','add',{g:'②“挑战杯”赛事',n:lv+' · '+RANKS[i],v:v,h:'国特/一等奖参照国金，国二参照国银，国三参照国铜，以此类推'});
+}));
+const ZX = {'国金降档→省金':25,'国银降档→省银':20,'国铜降档→省铜':15,'省金降档→校金':15,'省银降档→校银':8,'省铜降档→校铜':6};
+Object.entries(ZX).forEach(([lv,v])=>RANKS.forEach((r,i)=>{
+  const m = {'国金降档→省金':[25,10,5],'国银降档→省银':[20,7.5,0],'国铜降档→省铜':[15,5,0],
+             '省金降档→校金':[15,5,0],'省银降档→校银':[8,2.5,0],'省铜降档→校铜':[6,1,0]}[lv][i];
+  push('innovation','add',{g:'②挑战杯专项赛（降一档）',n:lv+' · '+r,v:m,h:'红色专项、黑科技、揭榜挂帅、人工智能+ 适用'});
+}));
+push('innovation','add',{g:'①②类竞赛材料',n:'提交符合规定的竞赛材料 · 排序 1-5 名',v:1});
+push('innovation','add',{g:'①②类竞赛材料',n:'提交符合规定的竞赛材料 · 排序 6-10 名',v:0.5});
+const OTHER = {A2:{'国家级':{'一等奖':30,'二等奖':20,'三等奖':15,'其他奖':10},'省级':{'一等奖':15,'二等奖':12,'三等奖':8,'其他奖':6},'校级':{'一等奖':8,'二等奖':6,'三等奖':4,'其他奖':2},'院级':{'一等奖':3,'二等奖':2,'三等奖':1}},
+               A3:{'国家级':{'一等奖':20,'二等奖':15,'三等奖':10,'其他奖':5},'省级':{'一等奖':10,'二等奖':8,'三等奖':6,'其他奖':3},'校级':{'一等奖':6,'二等奖':4,'三等奖':2,'其他奖':1},'院级':{'一等奖':3,'二等奖':2,'三等奖':1}},
+               B :{'国家级':{'一等奖':15,'二等奖':12,'三等奖':8,'其他奖':2},'省级':{'一等奖':8,'二等奖':6,'三等奖':3,'其他奖':1},'校级':{'一等奖':3,'二等奖':2,'三等奖':1,'其他奖':0.5},'院级':{'一等奖':2,'二等奖':1,'三等奖':0.5}},
+               '普通':{'国家级':{'一等奖':6,'二等奖':5,'三等奖':4,'其他奖':0},'省级':{'一等奖':4,'二等奖':3,'三等奖':2,'其他奖':0},'校级':{'一等奖':3,'二等奖':2,'三等奖':1,'其他奖':0},'院级':{'一等奖':2,'二等奖':1,'三等奖':0.5}}};
+Object.entries(OTHER).forEach(([cls,lvs])=>Object.entries(lvs).forEach(([lv,rks])=>
+  Object.entries(rks).forEach(([rk,v])=>push('innovation','add',{g:'③其他竞赛 · '+cls+' 类',n:lv+' '+rk,v:v}))));
+push('innovation','add',{g:'③其他竞赛 · 未获奖',n:'A2 / A3 / B 类提交材料未获奖',v:0.3,cap:'noaward',h:'一次 0.3 分，累计上限 3 分'});
+[['SCI / SSCI / EI / CPCI',30],['国家级刊物',20],['省级刊物',15],['学术论文集（省级以上）',10]]
+  .forEach(([n,v])=>push('innovation','add',{g:'发表学术论文',n:n,v:v,h:'第一作者；其他成员减半（用系数 0.5）'}));
+[['独（合）著 · ≥10 万字',20],['独（合）著 · ＜10 万字（学院认定 8–15 分）',10],['主（参）编 · ≥10 万字',15],
+ ['主（参）编 · ≥5 万字',12],['主（参）编 · ≥1 万字',8],['主（参）编 · ＜1 万字',5]]
+  .forEach(([n,v])=>push('innovation','add',{g:'出版著作',n:n,v:v,h:'合著按实际承担工作量计分'}));
+Object.assign(CATALOG.innovation.add.find(x=>x.n.startsWith('独（合）著 · ＜10 万字')),{min:8,max:15});
+[['国家发明专利',15],['实用新型专利',5],['外观设计专利',5],['软件著作权',2.5]]
+  .forEach(([n,v])=>push('innovation','add',{g:'科研成果与科技发明',n:n,v:v,tag:'patent',h:'只计得分最高一项，不累加；须江师大为申请人'}));
+const MEDIA = {'国家级权威报刊或新闻媒体':[15,12,8],'省级重要报纸或新闻媒体':[12,8,5],
+               '公开发行的地市级报刊或地方新闻媒体':[8,5,3],'学校主办的其他报纸或媒体':[5,3,2],'学院主办的内部刊物':[3,2,1]};
+const WORDS = ['1500 字以上','600-1500 字','600 字以下'];
+Object.entries(MEDIA).forEach(([m,arr])=>arr.forEach((v,i)=>
+  push('innovation','add',{g:'发表文学、艺术、新闻作品',n:m+' · '+WORDS[i],v:v,cap:'work',h:'累计不超过 20 分；合作减半（系数 0.5）'})));
+const CERTS = [['国家计算机一级',6],['国家计算机二级',8],['国家计算机三级',10],
+ ['大学英语四级（非英语专业）',5],['大学英语六级（非英语专业）',10],
+ ['英语专业四级',5],['英语专业八级',10],
+ ['JLPT N3',6],['JLPT N2',8],['JLPT N1',10],
+ ['DELF/TCF B1',4],['DELF/TCF B2',6],['DALF C1',8],['DALF C2 或以上',10],
+ ['ТРКИ-I（一级）',4],['俄语专业四级',5],['ТРКИ（二级）',6],['ТРКИ-III（三级）',8],['ТРКИ-IV 及以上（四级/C2）',10],['俄语专业八级',10],
+ ['TOPIK 3 级',4],['TOPIK 4 级',6],['TOPIK 5 级',8],['TOPIK 6 级',10],
+ ['普通话二甲',6],['普通话一乙',8],['普通话一甲',10],
+ ['初级会计证',10],['人力资源管理师',10],['证券从业资格',10],['证券分析师',10],['银行从业资格',10],
+ ['英语口译笔译等级考试',10],['英语口译笔译等级 · 三级',8],['英语口译笔译等级 · 二级',10],
+ ['上海外语口译 · 中级',8],['上海外语口译 · 高级',10],['软件资格水平考试',10],['秘书职业考试',10],['律师资格考试',10],
+ ['教师资格证（面试通过取得合格证明）',10],
+ ['BEC 初级',6],['BEC 中级',8],['BEC 高级',10],
+ ['雅思 6.5',4],['雅思 7.0',6],['雅思 7.5',8],['雅思 8.0 及以上',10],
+ ['托福 85-90',4],['托福 91-100',6],['托福 101-109',8],['托福 110 及以上',10]];
+CERTS.forEach(([n,v])=>push('innovation','add',{g:'专业技能 / 职业技能证书',n:n,v:v,cap:'cert',h:'每项 ≤ 10 分，每学年累计 ≤ 20 分；以落款时间归学年，只加 1 次'}));
+push('innovation','add',{g:'专业技能 / 职业技能证书',n:'其他经学院审核认定的证书',v:10,cap:'cert',h:'单科成绩合格证不属此范围（驾驶证不算）'});
+const certTagRules=[[/^国家计算机/,'computerCert'],[/大学英语[四六]级/,'cetCert'],[/英语专业[四八]级/,'temCert'],[/^JLPT/,'jlptCert'],[/DELF|DALF|TCF/,'frenchCert'],[/ТРКИ|俄语专业/,'russianCert'],[/TOPIK/,'topikCert'],[/普通话/,'mandarinCert'],[/英语口译笔译等级/,'translationCert'],[/上海外语口译/,'shanghaiCert'],[/^BEC/,'becCert'],[/^雅思/,'ieltsCert'],[/^托福/,'toeflCert']];
+CATALOG.innovation.add.forEach(it=>{ if(it.cap==='cert'){ const r=certTagRules.find(([re])=>re.test(it.n)); if(r) it.tag=r[1]; } });
+push('innovation','add',{g:'社会实践',n:'个人参加社会实践（旧数据兼容，默认按暑假）',v:3,tag:'summerPractice',h:'新录入请优先选择后面的“寒假/暑假个人社会实践”'});
+push('innovation','add',{g:'社会实践',n:'暑期“三下乡”/ 女子军乐团集训 / 国旗护卫队集训',v:6,tag:'summerPractice',h:'不与暑期个人社会实践叠加，可与寒假实践叠加'});
+[['优秀实践队伍 · 院级',1],['优秀实践队伍 · 校级',2],['优秀实践队伍 · 省级',3],['优秀实践队伍 · 国家级',4]]
+  .forEach(([n,v])=>push('innovation','add',{g:'社会实践',n:n,v:v,h:'团队成员；宣传报道、调研报告不额外加分'}));
+push('innovation','add',{g:'其它实践',n:'参加学院组织的专业学术讲座、校友名师讲坛',v:0.5,cap:'lecture',h:'每次 0.5 分，累计上限 5 分'});
+push('innovation','add',{g:'其它实践',n:'“群英荟萃”学子大讲堂主讲人',v:2,cap:'forum',h:'每次 2 分，累计上限 6 分'});
+push('innovation','add',{g:'其它实践',n:'参加招聘会、招聘宣讲会',v:1,cap:'jobfair',h:'每次 1 分，累计上限 10 分'});
+// 新增项目均追加在目录末尾，避免破坏既有本地存档中的目录索引
+[['鉴定成果（前三名）· 国际级',20],['鉴定成果（前三名）· 国家级',15],['鉴定成果（前三名）· 省级',10],['鉴定成果（前三名）· 市/校级',5]]
+  .forEach(([n,v])=>push('innovation','add',{g:'科研成果与科技发明（补充）',n:n,v:v,tag:'researchOutcome',h:'不同成果可累计；同一成果不同级别只取最高，需填写项目名称'}));
+push('innovation','add',{g:'社会实践（按假期）',n:'寒假个人社会实践',v:3,tag:'winterPractice',h:'同一寒假多项实践不叠加，取最高'});
+push('innovation','add',{g:'社会实践（按假期）',n:'暑假个人社会实践',v:3,tag:'summerPractice',h:'不与暑期“三下乡”等集训项目叠加'});
+push('innovation','add',{g:'专业技能 / 职业技能证书（补充）',n:'上海外语口译 · 中级（仅通过笔试）',v:4,tag:'shanghaiCert',cap:'cert',h:'仅通过笔试按中级标准减半'});
+push('innovation','add',{g:'专业技能 / 职业技能证书（补充）',n:'上海外语口译 · 高级（仅通过笔试）',v:5,tag:'shanghaiCert',cap:'cert',h:'仅通过笔试按高级标准减半'});
+
+/* --- 身体心理 --- */
+const PA = CATALOG.physical.add;
+const GRADE = {'国家级':[19,15,11,5],'省级':[14,9,6.5,3],'校级':[9,5.5,3.5,1],'院级':[3.5,2.5,1,1]};
+const GLAB = ['一等奖','二等奖','三等奖','参加'];
+Object.entries(GRADE).forEach(([lv,arr])=>arr.forEach((v,i)=>
+  push('physical','add',{g:'按等次评奖',n:lv+' '+GLAB[i],v:v,tag:'physicalEvent',h:'同一项目不同等级只取最高；请填写项目名称'})));
+const RANK = {'全国':[30,20,18,16,14,12,10,8,5],'省级':[20,15,13,10,8,7,6,5,3],
+              '校级':[15,10,8,6,5,4,3,2,1],'院级':[5,4,3,3,2,2,2,1,1]};
+const RLAB = ['破记录','第一名','第二名','第三名','第四名','第五名','第六名','第七、八名','参加'];
+Object.entries(RANK).forEach(([lv,arr])=>arr.forEach((v,i)=>
+  push('physical','add',{g:'按名次评奖',n:lv+' '+RLAB[i],v:v,tag:'physicalEvent',h:'同一项目不同等级只取最高；集体/团队、班级体育赛、校外非竞赛选择减半'})));
+CATALOG.physical.sub.push({g:'惩罚',n:'体能测试不达标 或 体育课成绩不合格',v:30});
+
+/* ============ 2025 级班级课程预设（公共选修课不含在内） ============ */
+const COMMON_COURSES = {
+  1:[['056001','大学体育Ⅰ',1],['024015','国家安全教育',2],['028021','红色文化',1],['037001','军事理论',2],
+     ['062326','人工智能（文管）',2],['028025','思想道德与法治',3],['024008','职业生涯规划与就业指导',2]],
+  2:[['056002','大学体育Ⅱ',1],['028022','劳动教育概论',1],['062329','数据库技术及应用',3],
+     ['028010','形势与政策',2],['028016','中国近现代史纲要',3]]
+};
+const CLASS_COURSES = {
+  finance:{name:'商务英语（国际金融）班',1:[['255506','高等数学（经管类）Ⅰ',3],['269547','会计学导论SIS',3],['269674','商务英语视听Ⅰ',3],['269396','商务英语阅读ⅠSIS',2],['269546','英语语音与会话',2],['269544','综合商务英语ⅠSIS',3]],2:[['255507','高等数学（经管类）Ⅱ',3],['269607','经济学导论Ⅰ',3],['269499','商务英语口语ⅠSIS',1],['269712','商务英语视听Ⅱ',3],['269583','商务英语阅读ⅡSIS',2],['269582','综合商务英语ⅡSIS',3]]},
+  accounting:{name:'商务英语（国际会计）班',1:[['255506','高等数学（经管类）Ⅰ',3],['269547','会计学导论SIS',3],['269674','商务英语视听Ⅰ',3],['269396','商务英语阅读ⅠSIS',2],['269546','英语语音与会话',2],['269544','综合商务英语ⅠSIS',3]],2:[['255507','高等数学（经管类）Ⅱ',3],['269607','经济学导论Ⅰ',3],['269499','商务英语口语ⅠSIS',1],['269712','商务英语视听Ⅱ',3],['269583','商务英语阅读ⅡSIS',2],['269711','中级财务会计',3],['269582','综合商务英语ⅡSIS',3]]},
+  business:{name:'商务英语（跨国商务）班',1:[['269674','商务英语视听Ⅰ',3],['269396','商务英语阅读ⅠSIS',2],['269546','英语语音与会话',2],['269544','综合商务英语ⅠSIS',3]],2:[['269619','管理学导论SIS（双语）',2],['269607','经济学导论Ⅰ',3],['269499','商务英语口语ⅠSIS',1],['269712','商务英语视听Ⅱ',3],['269583','商务英语阅读ⅡSIS',2],['269025','英语国家概况SIS',2],['269582','综合商务英语ⅡSIS',3]]},
+  english:{name:'英语班',1:[['252456','英语视听说Ⅰ',2],['252593','英语语音',2],['252019','英语阅读Ⅰ',2],['252459','中国文化概要',2],['252012','综合英语Ⅰ',4]],2:[['252538','英语口语',2],['252592','英语视听说Ⅱ',2],['252461','英语写作Ⅰ',2],['252034','英语语法',2],['252020','英语阅读Ⅱ',2],['252014','综合英语Ⅱ',4]]},
+  japanese:{name:'日语班',1:[['252382','基础日语Ⅰ',8],['252141','日语语音',1]],2:[['252383','基础日语Ⅱ',8],['252098','日本概况',2],['252460','日语会话Ⅰ',1],['252458','日语视听说Ⅰ',1],['252012','综合英语Ⅰ',4]]},
+  french:{name:'法语班',1:[['252455','法语视听说Ⅰ',1],['252454','基础法语Ⅰ',8]],2:[['252351','初级法语语法',2],['252353','法语会话Ⅰ',2],['252560','法语视听说Ⅱ',1],['252350','基础法语Ⅱ',6],['252012','综合英语Ⅰ',4]]},
+  russian:{name:'俄语班',1:[['252453','初级俄语语法Ⅰ',1],['252452','俄语会话Ⅰ',1],['252451','俄语语音',1],['252420','基础俄语Ⅰ',6]],2:[['252525','初级俄语视听说Ⅰ',1],['252526','初级俄语语法Ⅱ',1],['252524','俄语会话Ⅱ',1],['252523','俄语基础写作Ⅰ',2],['252415','俄语阅读Ⅰ',2],['252416','基础俄语Ⅱ',6],['252012','综合英语Ⅰ',4]]}
+};
+
+/* ============ 状态 ============ */
+const KEY = 'jxnu-wgy-zpkh-2026';
+let roster = [];                 // [{id, sid, name}]
+let store  = {};                 // id -> 该同学的数据
+let curId  = null;
+let state  = blankData();        // 当前同学的实时镜像（与 store[curId] 同一对象）
+
+const $ = id => document.getElementById(id);
+const r2 = n => (Math.round((n + Number.EPSILON) * 100) / 100);
+const fmt = n => (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2);
+const clamp100 = n => Math.max(0, Math.min(100, n));
+const GRADE_MAP = {'优':90,'良':80,'中':70,'合格':60,'不合格':0};
+const MODULES = ['thought','innovation','physical'];
+
+function blankData(){
+  return { courses:[],
+           entries:{ thought:{add:[],sub:[]}, innovation:{add:[]}, physical:{add:[],sub:[]} },
+           bases:{ t:70, i:40, p:70 }, flags:{ postMax:true, zero:false, disqualified:false, dqReason:'' } };
+}
+function itemOf(mod,kind,id){ return CATALOG[mod][kind][id]; }
+function newId(){
+  return 'S' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+/* ============ 课程表 ============ */
+function scoreGradeValue(score){
+  const n=Number(score);
+  if(!Number.isFinite(n)||n<0||n>100) return '';
+  return n>=90?'90':n>=80?'80':n>=70?'70':n>=60?'60':'0';
+}
+function addCourse(data){
+  const tr = document.createElement('tr');
+  tr.dataset.code = data?.code || '';
+  tr.innerHTML = `
+    <td><input class="wide" placeholder="如：高级英语（二）" value="${esc(data?.name||'')}"></td>
+    <td><input type="number" step="0.5" min="0" value="${data?.credit ?? ''}" placeholder="学分"></td>
+    <td style="white-space:nowrap">
+      <input type="number" step="0.1" min="0" max="100" value="${data?.score ?? ''}" placeholder="分数" style="width:72px">
+      <select style="width:78px">
+        <option value="">等次</option>
+        <option value="90">优</option><option value="80">良</option><option value="70">中</option>
+        <option value="60">合格</option><option value="0">不合格</option>
+      </select>
+    </td>
+    <td><button class="sm" onclick="this.closest('tr').remove();syncCourses();recalc()">删除</button></td>`;
+  const inputs = tr.querySelectorAll('input');
+  const scoreIn = inputs[2];
+  const gradeSel = tr.querySelector('select');
+  const syncGrade = () => { gradeSel.value = scoreIn.value.trim() === '' ? '' : scoreGradeValue(scoreIn.value); };
+  syncGrade();
+  gradeSel.onchange = () => { if(gradeSel.value !== ''){ scoreIn.value = gradeSel.value; syncCourses(); recalc(); } };
+  scoreIn.addEventListener('input', syncGrade);
+  tr.querySelectorAll('input,select').forEach(el => el.addEventListener('input', () => { syncCourses(); recalc(); }));
+  $('courseBody').appendChild(tr);
+  syncCourses(); recalc();
+}
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function syncCourses(){
+  state.courses = [...$('courseBody').querySelectorAll('tr')].map(tr => {
+    const tds = tr.querySelectorAll('td');
+    const creditEl = tds[1].querySelector('input');
+    const scoreEl = tds[2].querySelector('input');
+    const creditRaw = creditEl.value.trim(), scoreRaw = scoreEl.value.trim();
+    const credit = creditRaw === '' ? null : Number(creditRaw);
+    const score = scoreRaw === '' ? null : Number(scoreRaw);
+    creditEl.classList.toggle('invalid', credit !== null && (!Number.isFinite(credit) || credit <= 0));
+    scoreEl.classList.toggle('invalid', score !== null && (!Number.isFinite(score) || score < 0 || score > 100));
+    return { code: tr.dataset.code || '', name: tds[0].querySelector('input').value,
+             credit, score };
+  });
+}
+function clearCourses(){ $('courseBody').innerHTML=''; state.courses=[]; recalc(); }
+
+function courseRows(){ return [...$('courseBody').querySelectorAll('tr')]; }
+function removeBlankCourseRows(){
+  courseRows().forEach(tr=>{ if([...tr.querySelectorAll('input')].every(x=>!x.value.trim())) tr.remove(); });
+}
+function normalizeCourseName(s){
+  return String(s||'').replace(/[\s·（）()ⅡⅢⅣⅠ]/g,'').replace(/[一1]/g,'i').replace(/[二2]/g,'ii').toLowerCase();
+}
+function upsertCourse(c){
+  const rows = courseRows();
+  const target = rows.find(tr => (c.code && tr.dataset.code === c.code) ||
+    normalizeCourseName(tr.querySelector('td input').value) === normalizeCourseName(c.name));
+  if(!target){ addCourse(c); return 'added'; }
+  if(c.code) target.dataset.code = c.code;
+  const ins = target.querySelectorAll('input');
+  if(c.name) ins[0].value = c.name;
+  if(Number.isFinite(c.credit) && c.credit > 0) ins[1].value = c.credit;
+  if(Number.isFinite(c.score) && c.score >= 0 && c.score <= 100){
+    ins[2].value = c.score;
+    target.querySelector('select').value = scoreGradeValue(c.score);
+  }
+  return 'updated';
+}
+function importPresetCourses(){
+  const key = $('classPreset').value, year = Number($('yearPreset').value);
+  const preset = CLASS_COURSES[key]; if(!preset) return;
+  const terms = [year * 2 - 1, year * 2];
+  removeBlankCourseRows();
+  let added = 0, updated = 0;
+  terms.flatMap(t => [...(COMMON_COURSES[t]||[]), ...(preset[t]||[])]).forEach(([code,name,credit])=>{
+    const r = upsertCourse({code,name,credit,score:null}); r === 'added' ? added++ : updated++;
+  });
+  syncCourses(); recalc();
+  $('presetHint').textContent = `${preset.name} · 第${year}学年：新增 ${added} 门，更新 ${updated} 门`;
+  setTimeout(()=>{ $('presetHint').textContent=''; },5000);
+}
+function toggleGradeImport(){
+  const box=$('gradeImportBox'); box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  if(box.style.display === 'block') $('gradeText').focus();
+}
+function gradeValue(s){
+  const t=String(s||'').trim();
+  if(Object.prototype.hasOwnProperty.call(GRADE_MAP,t)) return GRADE_MAP[t];
+  const n=Number(t.replace(/分$/,'')); return Number.isFinite(n) && n>=0 && n<=100 ? n : null;
+}
+function parseGradeLines(text){
+  const out=[], bad=[];
+  text.split(/\r?\n/).forEach((line,lineNo)=>{
+    const t=line.trim(); if(!t || /^(序号|课程号|课程名称|学分|成绩)/.test(t)) return;
+    const parts=t.split(/[，,\t]+|\s+/).map(x=>x.trim()).filter(Boolean);
+    let scoreIndex=-1, score=null;
+    for(let i=parts.length-1;i>=0;i--){ const v=gradeValue(parts[i]); if(v!==null){scoreIndex=i;score=v;break;} }
+    if(scoreIndex<0){ bad.push(lineNo+1); return; }
+    let code='',credit=null;
+    const codeIndex=parts.findIndex(x=>/^\d{6,7}$/.test(x));
+    if(codeIndex>=0) code=parts[codeIndex];
+    for(let i=scoreIndex-1;i>=0;i--){ const n=Number(parts[i]); if(Number.isFinite(n)&&n>0&&n<=20&&i!==codeIndex){credit=n;break;} }
+    const nameParts=parts.filter((_,i)=>i!==codeIndex && i!==scoreIndex && !(credit!==null && Number(parts[i])===credit));
+    const name=nameParts.join(' ').trim();
+    if(!name && !code){ bad.push(lineNo+1); return; }
+    out.push({code,name,credit,score});
+  });
+  return {out,bad};
+}
+function importGrades(){
+  const parsed=parseGradeLines($('gradeText').value);
+  if(!parsed.out.length){ $('gradeHint').textContent='未识别到有效成绩，请检查粘贴格式'; return; }
+  if($('gradeReplace').checked) clearCourses(); else removeBlankCourseRows();
+  let added=0,updated=0;
+  parsed.out.forEach(c=>{ const r=upsertCourse(c); r==='added'?added++:updated++; });
+  syncCourses(); recalc();
+  $('gradeHint').textContent=`已导入 ${parsed.out.length} 门（新增 ${added}，更新 ${updated}）`+
+    (parsed.bad.length?`；第 ${parsed.bad.join('、')} 行未识别`:'');
+}
+
+/* ============ 加分条目 ============ */
+function boxId(mod, kind){ return mod + kind.charAt(0).toUpperCase() + kind.slice(1); }
+
+function addEntry(mod, kind, data){
+  const list = CATALOG[mod][kind];
+  const box = $(boxId(mod, kind));
+  if(!box) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'entry';
+  const groups = [...new Set(list.map(i => i.g))];
+  const html = groups.map(g => {
+    const items = list.map((it, idx) => ({ it, idx })).filter(x => x.it.g === g);
+    return `<optgroup label="${esc(g)}">` + items.map(({ it, idx }) =>
+      `<option value="${idx}"${data && data.cat === idx ? ' selected' : ''}>${esc(it.n)}　${it.v} 分${it.cap ? '（有上限）' : ''}</option>`
+    ).join('') + `</optgroup>`;
+  }).join('');
+  const factorOne = mod==='physical' ? '个人竞赛 ×1' : '全额 ×1';
+  wrap.innerHTML = `
+    <select>${html}</select>
+    <input class="entry-memo" value="${esc(data?.memo||'')}" placeholder="项目/证书名称、日期或材料编号" title="用于同一项目去重与材料审核">
+    <input type="number" step="0.1" min="${list[data?.cat??0]?.min??0}" max="${list[data?.cat??0]?.max??list[data?.cat??0]?.v}" value="${data ? data.val : list[0].v}" title="分值（受细则范围约束）">
+    <input type="number" step="1" min="1" value="${data ? data.times : 1}" title="次数">
+    <select title="系数">
+      <option value="1"${!data || data.k === 1 ? ' selected' : ''}>${factorOne}</option>
+      <option value="0.5"${data && data.k === 0.5 ? ' selected' : ''}>团队/集体/仅参加 ×0.5</option>
+      <option value="0.25"${data && data.k === 0.25 ? ' selected' : ''}>×0.25</option>
+      <option value="0.1"${data && data.k === 0.1 ? ' selected' : ''}>×0.1 线上</option>
+    </select>
+    <select class="proof" title="证明材料审核状态">
+      <option value="pending"${!data || !data.proof || data.proof==='pending'?' selected':''}>待核验</option>
+      <option value="verified"${data && data.proof==='verified'?' selected':''}>已核验</option>
+      <option value="rejected"${data && data.proof==='rejected'?' selected':''}>不通过</option>
+    </select>
+    <div class="amt">0</div>
+    <button class="sm" onclick="this.closest('.entry').remove();readEntries();recalc()" title="删除">×</button>`;
+  if(data) wrap.querySelector('select').value = String(data.cat);
+  const sel = wrap.querySelector('select');
+  sel.onchange = () => {
+    const valInput=wrap.querySelectorAll('input[type=number]')[0],it=list[sel.value];
+    valInput.min=it.min??0; valInput.max=it.max??it.v; valInput.value=it.v;
+    readEntries(); recalc();
+  };
+  wrap.querySelectorAll('input,select').forEach(el => el.addEventListener('input', () => { readEntries(); recalc(); }));
+  box.appendChild(wrap);
+  if(!data){ readEntries(); recalc(); }
+}
+function readEntries(){
+  ['thought','innovation','physical'].forEach(mod=>{
+    ['add','sub'].forEach(kind=>{
+      const box = $(boxId(mod, kind));
+      if(!box) return;
+      state.entries[mod][kind] = [...box.querySelectorAll('.entry')].map(e=>{
+        const ins = e.querySelectorAll('input[type=number]');
+        const sels = e.querySelectorAll('select');
+        const cat=parseInt(sels[0].value),it=itemOf(mod,kind,cat)||{v:0};
+        const val=Math.max(it.min??0,Math.min(it.max??it.v,parseFloat(ins[0].value)||0));
+        if(Number(ins[0].value)!==val) ins[0].value=val;
+        return { cat, val,
+                 times:Math.max(0,parseFloat(ins[1].value)||0), k:parseFloat(sels[1].value),
+                 proof:sels[2]?.value||'pending', memo:e.querySelector('.entry-memo')?.value.trim()||'' };
+      });
+    });
+  });
+}
+
+/* ============ 计算（纯函数，可脱离 DOM 批量算分） ============ */
+function calcModule(mod, addList, subList, flags){
+  const capCfg = CAPS[mod];
+  const raw = (addList||[]).map((e,i)=>({ i, e, it: itemOf(mod,'add',e.cat),
+    raw: e.proof==='rejected' ? 0 : e.val * e.times * (e.k===undefined?1:e.k) }));
+  // 同 tag 取最高
+  const byTag = {};
+  const eventScoped = new Set(['notable','physicalEvent','researchOutcome']);
+  raw.forEach(r => {
+    if(r.it && MAXG[r.it.tag]){
+      const key = eventScoped.has(r.it.tag) ? r.it.tag+'::'+(r.e.memo||'未命名项目') : r.it.tag;
+      (byTag[key] = byTag[key] || []).push(r);
+    }
+  });
+  if(mod === 'thought' && flags && !flags.postMax) delete byTag[POST];
+  const eff = raw.map(r => r.raw);
+  Object.values(byTag).forEach(arr=>{
+    if(arr.length < 2) return;
+    const max = Math.max(...arr.map(a => a.raw));
+    let seen = false;
+    arr.sort((a,b) => b.raw - a.raw).forEach(a=>{
+      if(!seen && a.raw === max){ seen = true; }
+      else { eff[a.i] = 0; }
+    });
+  });
+  let honorMismatch=false;
+  if(mod==='thought'){
+    const bases=raw.filter(r=>r.it?.tag==='grouphonor'&&eff[r.i]>0).sort((a,b)=>eff[b.i]-eff[a.i]);
+    const level=bases[0]?.it?.n?.split('·').pop().trim();
+    raw.filter(r=>r.it?.tag==='grouphonorExtra'&&eff[r.i]>0).forEach(r=>{
+      if(!level || !r.it.n.endsWith(level)){ eff[r.i]=0; honorMismatch=true; }
+    });
+  }
+  // 分组上限
+  const grpSum = {}, grpItems = {};
+  raw.forEach(r=>{
+    const c = r.it && r.it.cap;
+    if(!c) return;
+    grpSum[c] = (grpSum[c]||0) + eff[r.i];
+    (grpItems[c] = grpItems[c]||[]).push(r.i);
+  });
+  const notes = [];
+  if(honorMismatch) notes.push('班委额外加分与所选班级/团支部荣誉级别不一致，已不计入；请改选相同级别');
+  const unnamed=raw.filter(r=>eventScoped.has(r.it?.tag)&&!r.e.memo).length;
+  if(unnamed) notes.push(`有 ${unnamed} 条同类项目未填写项目名称，已按“同一未命名项目”取最高；填写名称可区分不同赛事/成果`);
+  if(mod==='physical' && raw.some(r=>r.e.k===1)) notes.push('身体心理项目请确认参赛形式：集体/团队、班级体育赛及校外非竞赛应选择 ×0.5');
+  Object.entries(grpSum).forEach(([c,sum])=>{
+    const cap = capCfg[c];
+    if(sum > cap){
+      const ratio = cap / sum;
+      grpItems[c].forEach(i => { eff[i] = eff[i] * ratio; });
+      notes.push(`「${CAP_LABEL[c]||c}」累计 ${fmt(sum)} 分，超出 ${cap} 分上限，已按比例折算为 ${cap} 分`);
+    }
+  });
+  let add = eff.reduce((a,b)=>a+b, 0);
+  if(add > capCfg.__add){
+    notes.push(`奖励分合计 ${fmt(add)} 分，超出本项 ${capCfg.__add} 分上限，已封顶`);
+    add = capCfg.__add;
+  }
+  const sub = (subList||[]).reduce((a,e)=>a + (e.proof==='rejected'?0:e.val*e.times*(e.k===undefined?1:e.k)), 0);
+  const pending = [...(addList||[]),...(subList||[])].filter(e=>!e.proof||e.proof==='pending').length;
+  if(pending) notes.push(`有 ${pending} 条材料待核验；当前按申报值暂计，审核不通过后将自动归零`);
+  return { add, sub, eff, raw, notes };
+}
+
+function computeScores(d){
+  const allCourses = d.courses || [];
+  const cs = allCourses.filter(c => Number.isFinite(c.credit) && c.credit > 0 && Number.isFinite(c.score) && c.score >= 0 && c.score <= 100);
+  const sumC = cs.reduce((a,c)=>a+c.credit, 0);
+  const sumS = cs.reduce((a,c)=>a+c.credit*c.score, 0);
+  const major = sumC > 0 ? r2(sumS/sumC) : 0;
+  const f = { ...(d.flags||{}), postMax:true, zero:!!d.flags?.zero };
+  const srcB = d.bases || { t:70, i:40, p:70 };
+  const b = { t:Math.max(0,Math.min(70,Number(srcB.t)||0)), i:Math.max(0,Math.min(40,Number(srcB.i)||0)), p:Math.max(0,Math.min(70,Number(srcB.p)||0)) };
+  const en = d.entries || {};
+  const t = calcModule('thought',    en.thought?.add,    en.thought?.sub,    f);
+  const i = calcModule('innovation', en.innovation?.add, [],                 f);
+  const p = calcModule('physical',   en.physical?.add,   en.physical?.sub,   f);
+  const thought = f.zero ? 0 : clamp100(b.t + t.add - t.sub);
+  const innov   = clamp100(b.i + i.add);
+  const phys    = clamp100(b.p + p.add - p.sub);
+  const conductContribution = r2(thought*0.15 + innov*0.15 + phys*0.10);
+  const conduct = r2(conductContribution / 0.40);
+  const total   = r2(major*0.6 + thought*0.15 + innov*0.15 + phys*0.10);
+  const invalidCourses = allCourses.filter(c => (c.name || c.credit !== null || c.score !== null) &&
+    !(Number.isFinite(c.credit) && c.credit > 0 && Number.isFinite(c.score) && c.score >= 0 && c.score <= 100)).length;
+  return { major, thought, innov, phys, conduct, conductContribution, total, t, i, p, nCourse:cs.length, sumC, invalidCourses,
+    disqualified:!!f.disqualified, dqReason:f.dqReason||'' };
+}
+
+function competitionRanks(){
+  const rows=roster.filter(x=>hasData(store[x.id])).map(x=>({id:x.id,s:computeScores(store[x.id])}));
+  const rankMap=key=>{
+    const sorted=[...rows].sort((a,b)=>b.s[key]-a.s[key]), out={}; let rank=0,last=null;
+    sorted.forEach((x,i)=>{ if(last===null||x.s[key]!==last) rank=i+1; last=x.s[key]; out[x.id]=rank; }); return out;
+  };
+  return { major:rankMap('major'), conduct:rankMap('conduct'), total:rankMap('total'), count:rows.length };
+}
+
+function hasData(d){
+  if(!d) return false;
+  if((d.courses||[]).some(c => Number.isFinite(c.credit) && c.credit > 0 && Number.isFinite(c.score))) return true;
+  if(d.flags?.disqualified || d.flags?.zero || d.flags?.dqReason) return true;
+  if(d.bases && (Number(d.bases.t)!==70 || Number(d.bases.i)!==40 || Number(d.bases.p)!==70)) return true;
+  return MODULES.some(m => ['add','sub'].some(k => (d.entries?.[m]?.[k]||[]).length > 0));
+}
+
+/* ============ 渲染 ============ */
+function recalc(){
+  syncCourses();
+  readEntries();
+  const activeThoughtSubs=(state.entries?.thought?.sub||[]).filter(e=>e.proof!=='rejected');
+  const hasElectric=activeThoughtSubs.some(e=>(itemOf('thought','sub',e.cat)?.n||'').includes('违规违章电器'));
+  const hasBadDebt=activeThoughtSubs.some(e=>(itemOf('thought','sub',e.cat)?.n||'').includes('恶意拖欠学费'));
+  if($('tZero').checked || hasElectric || hasBadDebt){
+    $('disqualified').checked=true;
+    if(!$('dqReason').value.trim()) $('dqReason').value=$('tZero').checked?'思想道德一票否决':hasElectric?'持有或使用违规违章电器':'恶意拖欠学费等不良诚信记录';
+  }
+  const bounded=(id,max)=>{ const el=$(id),v=Math.max(0,Math.min(max,parseFloat(el.value)||0)); if(Number(el.value)!==v) el.value=v; return v; };
+  state.bases = { t: bounded('tBase',70), i: bounded('iBase',40), p: bounded('pBase',70) };
+  state.flags = { postMax: true, zero: $('tZero').checked,
+    disqualified:$('disqualified').checked, dqReason:$('dqReason').value.trim() };
+  if(curId) store[curId] = state;
+
+  const s = computeScores(state);
+  $('nCourse').textContent   = s.nCourse;
+  $('nCredit').textContent   = fmt(s.sumC);
+  $('avgCredit').textContent = fmt(s.major);
+  $('courseHint').textContent = s.invalidCourses
+    ? `有 ${s.invalidCourses} 门课程信息不完整或超出范围，暂未计入`
+    : (s.nCourse ? '' : '填入课程后自动计算');
+
+  // 各模块小计与提示
+  [['thought','t',s.t],['innovation','i',s.i],['physical','p',s.p]].forEach(([mod,pre,m])=>{
+    $(pre+'A').textContent = fmt(m.add);
+    if($(pre+'S')) $(pre+'S').textContent = fmt(m.sub);
+    // 逐条标注折算情况
+    const box = $(boxId(mod,'add'));
+    if(box){
+      [...box.querySelectorAll('.entry')].forEach((e,idx)=>{
+        const amt = e.querySelector('.amt');
+        const v = m.eff[idx] ?? 0;
+        const o = m.raw[idx] ? m.raw[idx].raw : 0;
+        amt.textContent = fmt(v);
+        amt.className = 'amt' + (v===0 && o>0 ? ' zero' : (v < o - 0.001 ? ' cap' : ''));
+        amt.title = (v < o - 0.001 && !(v===0 && o>0)) ? '因封顶 / 取最高规则被折算' : '';
+      });
+    }
+  });
+  $('tB').textContent = state.bases.t; $('tT').textContent = fmt(s.thought);
+  $('iB').textContent = state.bases.i; $('iT').textContent = fmt(s.innov);
+  $('pB').textContent = state.bases.p; $('pT').textContent = fmt(s.phys);
+  $('tWarn').innerHTML = s.t.notes.map(n=>`<div class="warnbox">${n}</div>`).join('') +
+    (state.flags.zero ? '<div class="warnbox">已触发一票否决：思想道德素质总分直接评定为 0 分</div>' : '');
+  $('iWarn').innerHTML = s.i.notes.map(n=>`<div class="warnbox">${n}</div>`).join('');
+  $('pWarn').innerHTML = s.p.notes.map(n=>`<div class="warnbox">${n}</div>`).join('');
+
+  $('total').innerHTML = fmt(s.total) + '<small>分</small>';
+  $('s1').textContent = fmt(s.major);   $('c1').textContent = '贡献 ' + fmt(s.major*0.6);
+  $('s2').textContent = fmt(s.thought); $('c2').textContent = '贡献 ' + fmt(s.thought*0.15);
+  $('s3').textContent = fmt(s.innov);   $('c3').textContent = '贡献 ' + fmt(s.innov*0.15);
+  $('s4').textContent = fmt(s.phys);    $('c4').textContent = '贡献 ' + fmt(s.phys*0.10);
+  $('s5').textContent = fmt(s.conduct);
+  const ranks=competitionRanks(), pr=curId?ranks.major[curId]:null, cr=curId?ranks.conduct[curId]:null, tr=curId?ranks.total[curId]:null;
+  $('c5').textContent = cr ? `当前第 ${cr} / ${ranks.count}` : '当前排名 —';
+  $('rankInfo').textContent = `专业排名 ${pr?pr+' / '+ranks.count:'—'}　操行排名 ${cr?cr+' / '+ranks.count:'—'}　综合排名 ${tr?tr+' / '+ranks.count:'—'}`;
+  $('formula').textContent =
+    `${fmt(s.major)}×60% ＋ ${fmt(s.thought)}×15% ＋ ${fmt(s.innov)}×15% ＋ ${fmt(s.phys)}×10% ＝ ${fmt(s.total)}`;
+  updateRosterBar();
+  persist();
+}
+
+/* ============ 名册 ============ */
+function curIndex(){ return roster.findIndex(s => s.id === curId); }
+function curStudent(){ return roster[curIndex()] || null; }
+
+function updateRosterBar(){
+  const i = curIndex(), s = curStudent();
+  const done = roster.filter(x => hasData(store[x.id])).length;
+  if(!roster.length){
+    $('rName').textContent = '未导入名单';
+    $('rPos').textContent  = '导入名单后可逐人录入、自动存档';
+  }else{
+    $('rName').textContent = `${s ? (s.sid ? s.sid + '　' : '') + s.name : '（未选择）'}`;
+    $('rPos').textContent  = `第 ${i+1} / ${roster.length} 位　·　已录入 ${done} 人`;
+  }
+  const sel = $('rJump');
+  sel.innerHTML = roster.length
+    ? roster.map((x,n)=>`<option value="${x.id}"${x.id===curId?' selected':''}>${n+1}. ${x.sid ? x.sid + ' ' : ''}${x.name}</option>`).join('')
+    : '<option value="">（暂无名单）</option>';
+  const pct = roster.length ? Math.round(done / roster.length * 100) : 0;
+  $('rProg').firstElementChild.style.width = pct + '%';
+  $('rProg').title = `已录入 ${done} / ${roster.length} 人`;
+}
+
+function loadStudent(id){
+  if(curId && curId !== id) store[curId] = state;   // 交出上一位的数据
+  curId = id;
+  const d = (id && store[id]) || blankData();
+  d.bases = { t:70, i:40, p:70, ...(d.bases||{}) };
+  d.flags = { postMax:true, zero:false, disqualified:false, dqReason:'', ...(d.flags||{}) };
+  d.entries = d.entries || blankData().entries;
+  state = d;
+  if(id) store[id] = d;
+
+  $('courseBody').innerHTML = '';
+  MODULES.forEach(m => ['add','sub'].forEach(k => {
+    const b = $(boxId(m,k)); if(b) b.innerHTML = '';
+  }));
+  $('tBase').value = d.bases.t; $('iBase').value = d.bases.i; $('pBase').value = d.bases.p;
+  $('tPostMax').checked = true;
+  $('tZero').checked = !!d.flags.zero;
+  $('disqualified').checked = !!d.flags.disqualified;
+  $('dqReason').value = d.flags.dqReason || '';
+
+  // 先重建加分条目：addEntry 带数据时不触发 recalc，避免此时条目框为空把 state.entries 覆盖成空数组
+  MODULES.forEach(m => ['add','sub'].forEach(k => {
+    (d.entries?.[m]?.[k]||[]).forEach(e => addEntry(m,k,e));
+  }));
+  // 再重建课程：addCourse 会触发 recalc，但此时条目已在 DOM 中，不会被误清空
+  (d.courses||[]).forEach(c => addCourse(c));
+  if(!(d.courses||[]).length){ addCourse(); addCourse(); addCourse(); }
+  updateRosterBar();
+  recalc();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function gotoStudent(delta){
+  if(!roster.length) return;
+  const n = roster.length;
+  loadStudent(roster[((curIndex() < 0 ? 0 : curIndex()) + delta + n) % n].id);
+}
+function prevStudent(){ gotoStudent(-1); }
+function nextStudent(){ gotoStudent(1); }
+
+/* 名单解析：每行一人，支持「学号 姓名」「姓名,学号」或纯姓名 */
+function parseRoster(text){
+  const out = [];
+  const HEAD = /^(序号|编号|姓名|学号|名单|班级|专业)/;
+  text.split(/\r?\n/).forEach(line=>{
+    const t = line.trim();
+    if(!t) return;
+    const parts = t.split(/[，,、;；\t]+|\s+/).map(x=>x.trim()).filter(Boolean);
+    let sid = '', name = '';
+    if(parts.length >= 2){
+      if(parts.some(p => /^(姓名|学号)$/.test(p))) return;
+      const ni = parts.findIndex(p => /^\d{4,}$/.test(p));
+      if(ni >= 0){ sid = parts[ni]; name = parts.find((p,k)=>k!==ni) || ''; }
+      else { name = parts.join(' '); }
+    }else{
+      const m = t.match(/^(\d{4,})\s*(\S.*)$/) || t.match(/^(\S.*?)\s+(\d{4,})$/);
+      if(m){
+        if(/^\d{4,}$/.test(m[1])){ sid=m[1]; name=m[2]; }
+        else { name=m[1]; sid=m[2]; }
+      }
+      else name = t;
+    }
+    name = (name||'').trim();
+    if(!name || HEAD.test(name) && !sid) return;
+    out.push({ id:newId(), sid:(sid||'').trim(), name });
+  });
+  return out;
+}
+
+function mergeRoster(list){
+  list.forEach(s=>{
+    const old = roster.find(r => s.sid ? r.sid === s.sid : (!r.sid && r.name === s.name));
+    if(old){ s.id = old.id; if(s.sid) old.sid = s.sid; }
+  });
+  return list;
+}
+function doImport(){
+  const text = $('rosterText').value;
+  const list = parseRoster(text);
+  if(!list.length){ alert('没能识别出任何姓名，请检查格式。'); return; }
+  const append = $('appendMode').checked;
+  const merged = mergeRoster(list);
+  roster = append ? roster.concat(merged.filter(s => !roster.some(r => r.id === s.id))) : merged;
+  persist();
+  loadStudent(roster[0].id);
+  $('rosterText').value = '';
+  $('importHint').textContent = `已导入 ${list.length} 人` + (append ? '（追加）' : '');
+  setTimeout(()=>{ $('importHint').textContent = ''; }, 4000);
+}
+function toggleImport(){
+  const b = $('importBox');
+  b.style.display = b.style.display === 'none' ? 'block' : 'none';
+}
+function pickRosterFile(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.txt,.csv,.tsv';
+  inp.onchange = () => {
+    const f = inp.files[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = () => { $('rosterText').value = fr.result; doImport(); };
+    fr.readAsText(f, 'UTF-8');
+  };
+  inp.click();
+}
+function clearRoster(){
+  if(!roster.length) return;
+  if(!confirm(`确定清空名单？已录入的 ${roster.filter(x=>hasData(store[x.id])).length} 位同学的数据也会一并删除。`)) return;
+  roster = []; store = {}; curId = null; state = blankData();
+  persist(); loadStudent(null); updateRosterBar();
+}
+
+/* ============ 存取 ============ */
+function persist(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:roster, 数据:store, 当前:curId }));
+  }catch(e){ console.warn('本地存储写入失败', e); }
+}
+function restore(){
+  const raw = localStorage.getItem(KEY); if(!raw) return false;
+  try{
+    const d = JSON.parse(raw);
+    roster = d.名册 || [];
+    store  = d.数据 || {};
+    curId  = d.当前 || (roster[0] && roster[0].id) || null;
+    if(!roster.length){
+      // 兼容旧版单人存档
+      const legacy = d.entries || d;
+      if(legacy && (legacy.courses || legacy.thought)){
+        const id = newId();
+        roster = [{ id, sid:'', name:'（旧存档）' }];
+        store = { [id]: { courses: d.courses || legacy.courses || [],
+                          entries: legacy.entries || legacy,
+                          bases: { t: parseFloat(d.tBase) || 70, i: parseFloat(d.iBase) || 40, p: parseFloat(d.pBase) || 70 },
+                          flags: { postMax: d.tPostMax !== false, zero: !!d.tZero, disqualified:false, dqReason:'' } } };
+        curId = id;
+      }
+    }
+    return true;
+  }catch(e){ return false; }
+}
+function resetAll(){
+  if(!confirm('确定清空全部已填数据？此操作不可撤销。')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+function download(name, content, mime){
+  const blob = new Blob([content], { type: mime || 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ============ 原生 XLSX 导出（离线可用） ============ */
+function xmlEsc(v){ return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function colName(n){ let s=''; while(n){ n--; s=String.fromCharCode(65+n%26)+s; n=Math.floor(n/26); } return s; }
+function sheetXml(rows, widths){
+  const body=rows.map((row,ri)=>'<row r="'+(ri+1)+'">'+row.map((v,ci)=>{
+    const ref=colName(ci+1)+(ri+1), style=ri===0?' s="1"':(typeof v==='number'?' s="2"':'');
+    return typeof v==='number' && Number.isFinite(v)
+      ? `<c r="${ref}"${style}><v>${v}</v></c>`
+      : `<c r="${ref}" t="inlineStr"${style}><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+  }).join('')+'</row>').join('');
+  const cols=(widths||[]).map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+  const last=rows.length?colName(Math.max(...rows.map(r=>r.length)))+rows.length:'A1';
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${last}"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${cols}</cols><sheetData>${body}</sheetData><autoFilter ref="A1:${last}"/></worksheet>`;
+}
+function crc32(bytes){
+  let c=0xffffffff;
+  for(const b of bytes){ c^=b; for(let k=0;k<8;k++) c=(c>>>1)^((c&1)?0xedb88320:0); }
+  return (c^0xffffffff)>>>0;
+}
+function u16(n){ return [n&255,(n>>>8)&255]; } function u32(n){ return [n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]; }
+function zipFiles(files){
+  const enc=new TextEncoder(), chunks=[], central=[]; let offset=0;
+  Object.entries(files).forEach(([name,content])=>{
+    const nb=enc.encode(name), data=typeof content==='string'?enc.encode(content):content, crc=crc32(data);
+    const local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x800),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(nb.length),...u16(0),...nb]);
+    chunks.push(local,data);
+    central.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x800),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...nb]));
+    offset+=local.length+data.length;
+  });
+  const centralSize=central.reduce((n,x)=>n+x.length,0), count=central.length;
+  chunks.push(...central,new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(count),...u16(count),...u32(centralSize),...u32(offset),...u16(0)]));
+  return new Blob(chunks,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function xlsxFile(sheets){
+  const files={
+    '[Content_Types].xml':`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`,
+    '_rels/.rels':`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`,
+    'xl/workbook.xml':`<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s,i)=>`<sheet name="${xmlEsc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`,
+    'xl/_rels/workbook.xml.rels':`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+    'xl/styles.xml':`<?xml version="1.0" encoding="UTF-8"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Aptos"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0071E3"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`
+  };
+  sheets.forEach((s,i)=>files[`xl/worksheets/sheet${i+1}.xml`]=sheetXml(s.rows,s.widths));
+  return zipFiles(files);
+}
+function downloadBlob(name,blob){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+}
+function exportExcel(){
+  if(curId) store[curId]=state;
+  const people=roster.map(s=>({student:s,data:store[s.id]})).filter(x=>hasData(x.data));
+  if(!people.length){ alert('当前没有可导出的学生数据。'); return; }
+  const scored=people.map(x=>({...x,score:computeScores(x.data)}));
+  const rankOf=key=>{ const a=[...scored].sort((x,y)=>y.score[key]-x.score[key]),m={};let r=0,last=null;a.forEach((x,i)=>{if(last===null||x.score[key]!==last)r=i+1;last=x.score[key];m[x.student.id]=r;});return m; };
+  const rMajor=rankOf('major'),rConduct=rankOf('conduct'),rTotal=rankOf('total');
+  scored.sort((a,b)=>b.score.total-a.score.total);
+  const summary=[['综合排名','专业排名','操行排名','学号','姓名','专业素质','思想道德','实践创新','身体心理','操行素质','综合总分','评优资格','资格说明','课程门数','总学分','思想奖励','思想惩罚','实践奖励','身心奖励','身心惩罚']];
+  scored.forEach(x=>{ const z=x.score;
+    summary.push([rTotal[x.student.id],rMajor[x.student.id],rConduct[x.student.id],x.student.sid,x.student.name,z.major,z.thought,z.innov,z.phys,z.conduct,z.total,z.disqualified?'取消':'正常',z.dqReason,z.nCourse,z.sumC,z.t.add,z.t.sub,z.i.add,z.p.add,z.p.sub]); });
+  const courses=[['学号','姓名','课程号','课程名称','学分','成绩','自动等次','加权分']];
+  people.forEach(({student:s,data:d})=>(d.courses||[]).forEach(c=>{
+    if(Number.isFinite(c.credit)&&c.credit>0&&Number.isFinite(c.score)) courses.push([s.sid,s.name,c.code||'',c.name,c.credit,c.score,{'90':'优','80':'良','70':'中','60':'合格','0':'不合格'}[scoreGradeValue(c.score)]||'',r2(c.credit*c.score)]);
+  }));
+  const entries=[['学号','姓名','模块','类型','项目','项目/证书名称及材料编号','材料状态','标准分','次数','系数','计入分']];
+  people.forEach(({student:s,data:d})=>{
+    const z=computeScores(d), mods=[['thought','思想道德',z.t],['innovation','实践创新',z.i],['physical','身体心理',z.p]];
+    mods.forEach(([mod,label,calc])=>{
+      (d.entries?.[mod]?.add||[]).forEach((e,i)=>{ const it=itemOf(mod,'add',e.cat)||{}; entries.push([s.sid,s.name,label,'奖励',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.val,e.times,e.k,calc.eff[i]??0]); });
+      (d.entries?.[mod]?.sub||[]).forEach(e=>{ const it=itemOf(mod,'sub',e.cat)||{}; entries.push([s.sid,s.name,label,'惩罚',it.n||'',e.memo||'',e.proof==='verified'?'已核验':e.proof==='rejected'?'不通过':'待核验',e.val,e.times,e.k??1,e.proof==='rejected'?0:e.val*e.times*(e.k??1)]); });
+    });
+  });
+  const notes=[['项目','内容'],['文件','江西师范大学外国语学院本科生综合素质考评'],['导出时间',new Date().toLocaleString('zh-CN')],['计算公式','专业素质×60% + 思想道德×15% + 实践创新×15% + 身体心理×10%'],['数据范围',`已录入 ${people.length} 人；名单共 ${roster.length} 人`],['说明','课程明细、奖惩明细与汇总表均来自当前浏览器中的本地存档。']];
+  const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,11,11,11,11,11,11,11,28,10,10,10,10,10,10,10]},
+    {name:'课程明细',rows:courses,widths:[16,14,14,30,9,9,11,12]},{name:'奖惩明细',rows:entries,widths:[16,14,13,10,42,30,11,10,8,8,10]},
+    {name:'说明',rows:notes,widths:[16,72]}]);
+  downloadBlob('综合素质考评_全班整体_'+new Date().toISOString().slice(0,10)+'.xlsx',blob);
+}
+function exportJSON(){
+  if(curId) store[curId] = state;
+  download('综合素质考评_全班_' + new Date().toISOString().slice(0,10) + '.json',
+    JSON.stringify({ _说明:'江西师大外国语学院综合素质考评（院学工办〔2026〕1号）',
+      _导出时间:new Date().toLocaleString('zh-CN'), 名册:roster, 数据:store }, null, 2),
+    'application/json;charset=utf-8');
+}
+function importJSON(){
+  const inp = document.createElement('input'); inp.type='file'; inp.accept='.json';
+  inp.onchange = () => {
+    const f = inp.files[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{
+        const d = JSON.parse(fr.result);
+        if(!d || typeof d !== 'object') throw new Error('invalid root');
+        if(Array.isArray(d.名册)){
+          if(!d.名册.every(s => s && typeof s.id === 'string' && typeof s.name === 'string')) throw new Error('invalid roster');
+          if(d.数据 !== undefined && (!d.数据 || typeof d.数据 !== 'object' || Array.isArray(d.数据))) throw new Error('invalid store');
+          localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:d.名册, 数据:d.数据||{}, 当前:d.当前||null }));
+        }else{
+          const id = newId();
+          localStorage.setItem(KEY, JSON.stringify({ v:3, 名册:[{id,sid:'',name:'导入的同学'}],
+            数据:{ [id]: d.数据 || d }, 当前:id }));
+        }
+        location.reload();
+      }catch(e){ alert('文件格式不正确或内容不完整，未导入任何数据。'); }
+    };
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+/* 全班汇总（含排名），带 BOM 以便 Excel 直接打开 */
+function exportSummary(){
+  if(curId) store[curId] = state;
+  const done = [];
+  roster.forEach(s=>{
+    const d = store[s.id];
+    if(!hasData(d)) return;
+    const sc = computeScores(d);
+    done.push({ id:s.id, sid:s.sid, name:s.name, ...sc });
+  });
+  const mapRank=key=>{const m={};let rr=0,ll=null;[...done].sort((a,b)=>b[key]-a[key]).forEach((x,i)=>{if(ll===null||x[key]!==ll)rr=i+1;ll=x[key];m[x.id]=rr;});return m;};
+  const mr=mapRank('major'),cr=mapRank('conduct'),tr=mapRank('total');
+  done.sort((a,b)=> b.total - a.total);
+  const cell = v => (v === undefined || v === null || v === '' ? '' : String(v));
+  const rows = [['综合排名','专业排名','操行排名','学号','姓名','专业素质(60%)','思想道德(15%)','实践创新(15%)','身体心理(10%)','操行素质','总分','评优资格','资格说明']];
+  done.forEach(r=> {
+    rows.push([tr[r.id],mr[r.id],cr[r.id],r.sid,r.name,
+    fmt(r.major),fmt(r.thought),fmt(r.innov),fmt(r.phys),fmt(r.conduct),fmt(r.total),r.disqualified?'取消':'正常',r.dqReason]);
+  });
+  if(!roster.length || !done.length){
+    if(!confirm('当前还没有可导出的成绩（名单为空或均未录入数据），仍要导出空表吗？')) return;
+  }
+  const safeCell = c => /^[=+\-@]/.test(cell(c)) ? "'" + cell(c) : cell(c);
+  const csv = '\uFEFF' + rows.map(r => r.map(c =>
+    /[",\n]/.test(safeCell(c)) ? '"' + safeCell(c).replace(/"/g,'""') + '"' : safeCell(c)
+  ).join(',')).join('\r\n');
+  download('综合素质考评_全班汇总_' + new Date().toISOString().slice(0,10) + '.csv', csv,
+           'text/csv;charset=utf-8');
+}
+function toggleTheme(){
+  const h = document.documentElement;
+  h.dataset.theme = h.dataset.theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem(KEY + ':theme', h.dataset.theme);
+}
+
+/* 速查表 */
+function buildRef(){
+  let h = '<table><tr><th>其他竞赛</th><th>国家级</th><th>省级</th><th>校级</th><th>院级</th></tr>';
+  Object.entries(OTHER).forEach(([cls,lvs])=>{
+    ['一等奖','二等奖','三等奖','其他奖'].forEach(rk=>{
+      h += `<tr><td>${cls} · ${rk}</td>` + ['国家级','省级','校级','院级'].map(lv=>`<td>${lvs[lv][rk]}</td>`).join('') + '</tr>';
+    });
+  });
+  h += '</table><table style="margin-top:12px"><tr><th>文体心理 · 等次</th>' + GLAB.map(x=>`<th>${x}</th>`).join('') + '</tr>';
+  Object.entries(GRADE).forEach(([lv,arr])=>{ h += `<tr><td>${lv}</td>` + arr.map(v=>`<td>${v}</td>`).join('') + '</tr>'; });
+  h += '</table><table style="margin-top:12px"><tr><th>文体心理 · 名次</th>' + RLAB.map(x=>`<th>${x}</th>`).join('') + '</tr>';
+  Object.entries(RANK).forEach(([lv,arr])=>{ h += `<tr><td>${lv}</td>` + arr.map(v=>`<td>${v}</td>`).join('') + '</tr>'; });
+  h += '</table>';
+  $('refTables').innerHTML = h;
+}
+
+/* 初始化 */
+document.documentElement.dataset.theme = localStorage.getItem(KEY + ':theme') || 'light';
+buildRef();
+restore();
+if(!roster.length){
+  const id = newId();
+  roster = [{ id, sid:'', name:'未命名同学' }];
+  curId = id;
+}
+loadStudent(curId && roster.some(r => r.id === curId) ? curId : roster[0].id);
+
+/* 键盘 ← / → 切换上一位、下一位 */
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if(t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  if(e.key === 'ArrowLeft'){ prevStudent(); e.preventDefault(); }
+  else if(e.key === 'ArrowRight'){ nextStudent(); e.preventDefault(); }
+});
+</script>
+</body>
+</html>
