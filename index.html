@@ -244,7 +244,7 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
     <div class="formula" id="formula">专业×60% ＋ 思想道德×15% ＋ 实践创新×15% ＋ 身体心理×10%</div>
   </div>
   <div class="brk">
-    <div><div class="k">专业素质 60%</div><div class="v" id="s1">0.00</div><div class="c" id="c1">贡献 0.00</div></div>
+    <div><div class="k">专业素质原始分</div><div class="v" id="s1">0.00</div><div class="c" id="c1">60%折算分 0.00</div></div>
     <div><div class="k">思想道德 15%</div><div class="v" id="s2">0.00</div><div class="c" id="c2">贡献 0.00</div></div>
     <div><div class="k">实践创新 15%</div><div class="v" id="s3">0.00</div><div class="c" id="c3">贡献 0.00</div></div>
     <div><div class="k">身体心理 10%</div><div class="v" id="s4">0.00</div><div class="c" id="c4">贡献 0.00</div></div>
@@ -304,7 +304,7 @@ code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding
   <div class="tally">
     <span>课程门数：<b id="nCourse">0</b></span>
     <span>总学分：<b id="nCredit">0</b></span>
-    <span>总平均学分值：<b class="pos" id="avgCredit">0.00</b></span>
+    <span>专业素质原始分（总平均学分值）：<b class="pos" id="avgCredit">0.00</b></span>
   </div>
 </div>
 
@@ -945,7 +945,7 @@ function recalc(){
   $('pWarn').innerHTML = s.p.notes.map(n=>`<div class="warnbox">${n}</div>`).join('');
 
   $('total').innerHTML = fmt(s.total) + '<small>分</small>';
-  $('s1').textContent = fmt(s.major);   $('c1').textContent = '贡献 ' + fmt(s.major*0.6);
+  $('s1').textContent = fmt(s.major);   $('c1').textContent = '60%折算分 ' + fmt(s.major*0.6);
   $('s2').textContent = fmt(s.thought); $('c2').textContent = '贡献 ' + fmt(s.thought*0.15);
   $('s3').textContent = fmt(s.innov);   $('c3').textContent = '贡献 ' + fmt(s.innov*0.15);
   $('s4').textContent = fmt(s.phys);    $('c4').textContent = '贡献 ' + fmt(s.phys*0.10);
@@ -1189,9 +1189,9 @@ function exportExcel(){
   const rankOf=key=>{ const a=[...scored].sort((x,y)=>y.score[key]-x.score[key]),m={};let r=0,last=null;a.forEach((x,i)=>{if(last===null||x.score[key]!==last)r=i+1;last=x.score[key];m[x.student.id]=r;});return m; };
   const rMajor=rankOf('major'),rConduct=rankOf('conduct'),rTotal=rankOf('total');
   scored.sort((a,b)=>b.score.total-a.score.total);
-  const summary=[['综合排名','专业排名','操行排名','学号','姓名','专业素质','思想道德','实践创新','身体心理','操行素质','综合总分','评优资格','资格说明','课程门数','总学分','思想奖励','思想惩罚','实践奖励','身心奖励','身心惩罚']];
+  const summary=[['综合排名','专业排名','操行排名','学号','姓名','专业素质原始分','专业素质60%折算分','思想道德','实践创新','身体心理','操行素质','综合总分','评优资格','资格说明','课程门数','总学分','思想奖励','思想惩罚','实践奖励','身心奖励','身心惩罚']];
   scored.forEach(x=>{ const z=x.score;
-    summary.push([rTotal[x.student.id],rMajor[x.student.id],rConduct[x.student.id],x.student.sid,x.student.name,z.major,z.thought,z.innov,z.phys,z.conduct,z.total,z.disqualified?'取消':'正常',z.dqReason,z.nCourse,z.sumC,z.t.add,z.t.sub,z.i.add,z.p.add,z.p.sub]); });
+    summary.push([rTotal[x.student.id],rMajor[x.student.id],rConduct[x.student.id],x.student.sid,x.student.name,z.major,r2(z.major*0.6),z.thought,z.innov,z.phys,z.conduct,z.total,z.disqualified?'取消':'正常',z.dqReason,z.nCourse,z.sumC,z.t.add,z.t.sub,z.i.add,z.p.add,z.p.sub]); });
   const courses=[['学号','姓名','课程号','课程名称','学分','成绩','自动等次','加权分']];
   people.forEach(({student:s,data:d})=>(d.courses||[]).forEach(c=>{
     if(Number.isFinite(c.credit)&&c.credit>0&&Number.isFinite(c.score)) courses.push([s.sid,s.name,c.code||'',c.name,c.credit,c.score,{'90':'优','80':'良','70':'中','60':'合格','0':'不合格'}[scoreGradeValue(c.score)]||'',r2(c.credit*c.score)]);
@@ -1205,7 +1205,7 @@ function exportExcel(){
     });
   });
   const notes=[['项目','内容'],['文件','江西师范大学外国语学院本科生综合素质考评'],['导出时间',new Date().toLocaleString('zh-CN')],['计算公式','专业素质×60% + 思想道德×15% + 实践创新×15% + 身体心理×10%'],['数据范围',`已录入 ${people.length} 人；名单共 ${roster.length} 人`],['说明','课程明细、奖惩明细与汇总表均来自当前浏览器中的本地存档。']];
-  const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,11,11,11,11,11,11,11,28,10,10,10,10,10,10,10]},
+  const blob=xlsxFile([{name:'全班汇总',rows:summary,widths:[10,10,10,16,14,16,18,11,11,11,11,11,11,28,10,10,10,10,10,10,10]},
     {name:'课程明细',rows:courses,widths:[16,14,14,30,9,9,11,12]},{name:'奖惩明细',rows:entries,widths:[16,14,13,10,42,30,11,10,8,8,10]},
     {name:'说明',rows:notes,widths:[16,72]}]);
   downloadBlob('综合素质考评_全班整体_'+new Date().toISOString().slice(0,10)+'.xlsx',blob);
@@ -1256,10 +1256,10 @@ function exportSummary(){
   const mr=mapRank('major'),cr=mapRank('conduct'),tr=mapRank('total');
   done.sort((a,b)=> b.total - a.total);
   const cell = v => (v === undefined || v === null || v === '' ? '' : String(v));
-  const rows = [['综合排名','专业排名','操行排名','学号','姓名','专业素质(60%)','思想道德(15%)','实践创新(15%)','身体心理(10%)','操行素质','总分','评优资格','资格说明']];
+  const rows = [['综合排名','专业排名','操行排名','学号','姓名','专业素质原始分','专业素质60%折算分','思想道德(15%)','实践创新(15%)','身体心理(10%)','操行素质','总分','评优资格','资格说明']];
   done.forEach(r=> {
     rows.push([tr[r.id],mr[r.id],cr[r.id],r.sid,r.name,
-    fmt(r.major),fmt(r.thought),fmt(r.innov),fmt(r.phys),fmt(r.conduct),fmt(r.total),r.disqualified?'取消':'正常',r.dqReason]);
+    fmt(r.major),fmt(r.major*0.6),fmt(r.thought),fmt(r.innov),fmt(r.phys),fmt(r.conduct),fmt(r.total),r.disqualified?'取消':'正常',r.dqReason]);
   });
   if(!roster.length || !done.length){
     if(!confirm('当前还没有可导出的成绩（名单为空或均未录入数据），仍要导出空表吗？')) return;
